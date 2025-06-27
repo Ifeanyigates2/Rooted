@@ -56,7 +56,7 @@ export default function HeroSection() {
         </div>
 
         {/* Enhanced Slideshow in Foreground */}
-        <div className="relative rounded-3xl overflow-hidden mb-8 mx-auto max-w-5xl shadow-2xl">
+        <div className="relative rounded-3xl overflow-hidden mb-8 mx-auto shadow-2xl" style={{ maxWidth: '12.5in' }}>
           <div className="relative h-72 md:h-96 lg:h-[28rem]">
             {heroImages.map((image, index) => (
               <div
