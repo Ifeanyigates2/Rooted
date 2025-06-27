@@ -9,26 +9,29 @@ export default function HeroSection() {
   const [location, setLocation] = useState("");
   const [ethnicity, setEthnicity] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
 
-  // Beautiful images of Black American women
+  // Beautiful, diverse images of Black American women showcasing natural beauty
   const heroImages = [
-    "https://images.unsplash.com/photo-1594736797933-d0d0a7347bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
-    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
-    "https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
-    "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
-    "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200"
+    "https://images.unsplash.com/photo-1594736797933-d0d0a7347bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&h=1400&q=80",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&h=1400&q=80",
+    "https://images.unsplash.com/photo-1596815064285-45ed8a9c8463?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&h=1400&q=80",
+    "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&h=1400&q=80",
+    "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&h=1400&q=80"
   ];
 
-  // Auto-advance slideshow every 5 seconds
+  // Auto-advance slideshow every 4 seconds when playing
   useEffect(() => {
+    if (!isPlaying) return;
+    
     const interval = setInterval(() => {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 5000);
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [heroImages.length, isPlaying]);
 
   const handleSearch = () => {
     console.log("Search initiated:", { searchQuery, location, ethnicity });
@@ -52,33 +55,87 @@ export default function HeroSection() {
           </h1>
         </div>
 
-        {/* Slideshow in Foreground */}
-        <div className="relative rounded-3xl overflow-hidden mb-8 mx-auto max-w-4xl">
-          <div className="relative h-64 md:h-80 lg:h-96">
+        {/* Enhanced Slideshow in Foreground */}
+        <div className="relative rounded-3xl overflow-hidden mb-8 mx-auto max-w-5xl shadow-2xl">
+          <div className="relative h-72 md:h-96 lg:h-[28rem]">
             {heroImages.map((image, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
-                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1500 ease-in-out ${
+                  index === currentImageIndex 
+                    ? 'opacity-100 scale-100' 
+                    : 'opacity-0 scale-105'
                 }`}
                 style={{ backgroundImage: `url('${image}')` }}
               />
             ))}
             
-            {/* Slide indicators */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
+            {/* Gradient overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+            
+            {/* Navigation arrows */}
+            <button
+              onClick={() => setCurrentImageIndex(currentImageIndex === 0 ? heroImages.length - 1 : currentImageIndex - 1)}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 hover:scale-110 group"
+              aria-label="Previous image"
+            >
+              <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button
+              onClick={() => setCurrentImageIndex(currentImageIndex === heroImages.length - 1 ? 0 : currentImageIndex + 1)}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-3 transition-all duration-300 hover:scale-110 group"
+              aria-label="Next image"
+            >
+              <svg className="w-6 h-6 text-white group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            
+            {/* Enhanced slide indicators */}
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
               {heroImages.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  className={`relative transition-all duration-300 ${
                     index === currentImageIndex 
-                      ? 'bg-white scale-110' 
-                      : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                      ? 'w-8 h-3' 
+                      : 'w-3 h-3 hover:scale-110'
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
-                />
+                >
+                  <div className={`w-full h-full rounded-full transition-all duration-300 ${
+                    index === currentImageIndex 
+                      ? 'bg-white shadow-lg' 
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`} />
+                </button>
               ))}
+            </div>
+            
+            {/* Slide counter and play/pause button */}
+            <div className="absolute top-4 right-4 flex items-center space-x-3">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm text-white p-2 rounded-full transition-all duration-300 hover:scale-110"
+                aria-label={isPlaying ? "Pause slideshow" : "Play slideshow"}
+              >
+                {isPlaying ? (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
+              <div className="bg-black/30 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
+                {currentImageIndex + 1} / {heroImages.length}
+              </div>
             </div>
           </div>
         </div>
