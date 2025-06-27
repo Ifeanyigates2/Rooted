@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Search, Heart, Menu } from "lucide-react";
 import { Link } from "wouter";
+import AccountModal from "./AccountModal";
 
 export default function Header() {
   return (
@@ -22,11 +23,11 @@ export default function Header() {
             <Button variant="ghost" size="sm">
               <Heart className="h-4 w-4 mr-2" />
             </Button>
-            <Link href="/account">
+            <AccountModal>
               <Button className="bg-[var(--rooted-primary)] text-white hover:bg-[var(--rooted-primary)]/90 rounded-full px-6">
                 Account
               </Button>
-            </Link>
+            </AccountModal>
           </div>
           
           <div className="md:hidden">
@@ -46,11 +47,11 @@ export default function Header() {
                     <Heart className="h-4 w-4 mr-2" />
                     Favorites
                   </Button>
-                  <Link href="/account" className="w-full">
+                  <AccountModal>
                     <Button className="w-full bg-[var(--rooted-primary)] text-white">
                       Account
                     </Button>
-                  </Link>
+                  </AccountModal>
                 </div>
               </SheetContent>
             </Sheet>
