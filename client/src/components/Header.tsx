@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Search, Heart, Menu } from "lucide-react";
+import { Link } from "wouter";
 
 export default function Header() {
   return (
@@ -9,7 +10,9 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-[var(--rooted-primary)]">rooted.</h1>
+            <Link href="/">
+              <h1 className="text-2xl font-bold text-[var(--rooted-primary)] cursor-pointer">rooted.</h1>
+            </Link>
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
@@ -19,9 +22,11 @@ export default function Header() {
             <Button variant="ghost" size="sm">
               <Heart className="h-4 w-4 mr-2" />
             </Button>
-            <Button className="bg-[var(--rooted-primary)] text-white hover:bg-[var(--rooted-primary)]/90 rounded-full px-6">
-              Account
-            </Button>
+            <Link href="/account">
+              <Button className="bg-[var(--rooted-primary)] text-white hover:bg-[var(--rooted-primary)]/90 rounded-full px-6">
+                Account
+              </Button>
+            </Link>
           </div>
           
           <div className="md:hidden">
@@ -41,9 +46,11 @@ export default function Header() {
                     <Heart className="h-4 w-4 mr-2" />
                     Favorites
                   </Button>
-                  <Button className="w-full bg-[var(--rooted-primary)] text-white">
-                    Account
-                  </Button>
+                  <Link href="/account" className="w-full">
+                    <Button className="w-full bg-[var(--rooted-primary)] text-white">
+                      Account
+                    </Button>
+                  </Link>
                 </div>
               </SheetContent>
             </Sheet>
