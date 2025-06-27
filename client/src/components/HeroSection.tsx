@@ -20,7 +20,7 @@ export default function HeroSection() {
     "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=2400&h=1400&q=80"
   ];
 
-  // Auto-advance slideshow every 4 seconds when playing
+  // Auto-advance slideshow every 20 seconds when playing
   useEffect(() => {
     if (!isPlaying) return;
     
@@ -28,7 +28,7 @@ export default function HeroSection() {
       setCurrentImageIndex((prevIndex) => 
         prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
       );
-    }, 4000);
+    }, 20000);
 
     return () => clearInterval(interval);
   }, [heroImages.length, isPlaying]);
