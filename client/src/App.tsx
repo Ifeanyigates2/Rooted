@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import Account from "@/pages/Account";
+import Login from "@/pages/Login";
 import VerifyEmail from "@/pages/VerifyEmail";
 import CompleteProfile from "@/pages/CompleteProfile";
 import NotFound from "@/pages/not-found";
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/signup" component={Account} />
+      <Route path="/login" component={Login} />
       <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/complete-profile" component={CompleteProfile} />
       <Route component={NotFound} />

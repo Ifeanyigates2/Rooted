@@ -187,6 +187,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User login
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+
+      // In a real app, this would:
+      // 1. Find user by email in database
+      // 2. Compare hashed password
+      // 3. Create session/JWT token
+      // 4. Return user profile data
+      
+      // For demo, accept any email/password combination
+      // In production, you'd validate against stored credentials
+      res.json({ 
+        message: "Login successful",
+        user: {
+          id: "user_" + Date.now(),
+          email: email,
+          firstName: "Demo",
+          lastName: "User",
+          profileCompleted: Math.random() > 0.5 // Randomly determine if profile is completed
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to login" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
