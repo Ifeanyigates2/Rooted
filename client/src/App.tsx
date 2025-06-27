@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import Account from "@/pages/Account";
 import VerifyEmail from "@/pages/VerifyEmail";
+import CompleteProfile from "@/pages/CompleteProfile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/signup" component={Account} />
       <Route path="/verify-email" component={VerifyEmail} />
+      <Route path="/complete-profile" component={CompleteProfile} />
       <Route component={NotFound} />
     </Switch>
   );

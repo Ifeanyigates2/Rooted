@@ -160,6 +160,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Complete profile
+  app.post("/api/complete-profile", async (req, res) => {
+    try {
+      const { profilePicture, gender, ethnicity, ageRange, allergies, interests } = req.body;
+      
+      // In a real app, this would:
+      // 1. Update user profile in database
+      // 2. Handle profile picture upload to storage service
+      // 3. Save preferences and interests
+      // 4. Mark profile as completed
+      
+      res.json({ 
+        message: "Profile completed successfully",
+        profile: {
+          gender,
+          ethnicity,
+          ageRange,
+          allergies,
+          interests,
+          profileCompleted: true
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save profile" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

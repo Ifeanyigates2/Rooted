@@ -22,9 +22,9 @@ export default function VerifyEmail() {
     onSuccess: () => {
       toast({
         title: "Email verified successfully!",
-        description: "You can now sign in to your account.",
+        description: "Please complete your profile to continue.",
       });
-      setLocation("/"); // Redirect to home or dashboard
+      setLocation("/complete-profile");
     },
     onError: () => {
       toast({
