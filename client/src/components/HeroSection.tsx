@@ -36,51 +36,55 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative bg-gray-900 min-h-[70vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 hero-gradient z-20"></div>
+    <section className="relative bg-gray-900 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 hero-gradient z-10"></div>
       
-      {/* Slideshow Background */}
-      <div className="absolute inset-0">
-        {heroImages.map((image, index) => (
-          <div
-            key={index}
-            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
-              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ backgroundImage: `url('${image}')` }}
-          />
-        ))}
-      </div>
-      
-      {/* Slide indicators */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3 z-30">
-        {heroImages.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentImageIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              index === currentImageIndex 
-                ? 'bg-white scale-110' 
-                : 'bg-white bg-opacity-50 hover:bg-opacity-75'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
-      
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+      {/* Main Content Container */}
+      <div className="relative z-20 text-center text-white max-w-6xl mx-auto px-4 w-full">
+        {/* Hero Text */}
         <div className="mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-6">
             <span className="text-2xl font-bold">R</span>
           </div>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            Discover beauty professionals who knows your<br />
+            <span className="text-[var(--rooted-accent)]">skin, hair & culture !</span>
+          </h1>
+        </div>
+
+        {/* Slideshow in Foreground */}
+        <div className="relative rounded-3xl overflow-hidden mb-8 mx-auto max-w-4xl">
+          <div className="relative h-64 md:h-80 lg:h-96">
+            {heroImages.map((image, index) => (
+              <div
+                key={index}
+                className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+                  index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{ backgroundImage: `url('${image}')` }}
+              />
+            ))}
+            
+            {/* Slide indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
+              {heroImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentImageIndex 
+                      ? 'bg-white scale-110' 
+                      : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
         
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-          Discover beauty professionals who knows your<br />
-          <span className="text-[var(--rooted-accent)]">skin, hair & culture !</span>
-        </h1>
-        
-        <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl p-6 mt-8 max-w-3xl mx-auto">
+        {/* Search Interface Below Slideshow */}
+        <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl p-6 max-w-3xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--rooted-secondary)] h-4 w-4" />
