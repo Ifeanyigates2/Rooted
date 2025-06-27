@@ -31,6 +31,8 @@ export default function Account() {
         title: "Account created successfully!",
         description: "Please check your email for verification code.",
       });
+      // Store email in localStorage for verification page
+      localStorage.setItem("verificationEmail", formData.email);
       setLocation("/verify-email");
     },
     onError: () => {

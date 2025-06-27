@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Link, useLocation } from "wouter";
@@ -9,10 +9,19 @@ import { useToast } from "@/hooks/use-toast";
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
   const [otpValue, setOtpValue] = useState("");
+  const [email, setEmail] = useState("");
   const { toast } = useToast();
 
-  // Get email from URL params or localStorage (in real app)
-  const email = "petra@yahoo.com"; // This would come from signup flow
+  // Get email from localStorage on component mount
+  useEffect(() => {
+    const storedEmail = localStorage.getItem("verificationEmail");
+    if (storedEmail) {
+      setEmail(storedEmail);
+    } else {
+      // If no email found, redirect back to signup
+      setLocation("/signup");
+    }
+  }, [setLocation]);
 
   const verifyMutation = useMutation({
     mutationFn: async (otp: string) => {
@@ -24,6 +33,8 @@ export default function VerifyEmail() {
         title: "Email verified successfully!",
         description: "Please complete your profile to continue.",
       });
+      // Clean up the stored email
+      localStorage.removeItem("verificationEmail");
       setLocation("/complete-profile");
     },
     onError: () => {
@@ -42,6 +53,8 @@ export default function VerifyEmail() {
   };
 
   const handleResendCode = async () => {
+    if (!email) return;
+    
     try {
       await apiRequest("POST", "/api/resend-otp", { email });
       toast({
@@ -66,7 +79,7 @@ export default function VerifyEmail() {
           </h1>
           <p className="text-[var(--rooted-secondary)] mb-2">
             We sent an OTP to your registered email address{" "}
-            <span className="text-blue-600 font-medium">{email}</span>
+            <span className="text-blue-600 font-medium">{email || "..."}</span>
           </p>
           <p className="text-[var(--rooted-secondary)]">
             Please check and enter the code.
