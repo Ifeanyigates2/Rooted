@@ -2,9 +2,9 @@ import { MapPin, Phone, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-white py-12 border-t border-gray-200">
+    <footer className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-12 relative">
           {/* Company Info */}
           <div>
             <div className="flex items-center mb-4">
@@ -49,14 +49,16 @@ export default function Footer() {
               <a href="#" className="block text-[var(--rooted-secondary)] hover:text-[var(--rooted-primary)] transition-colors">Term of Use</a>
             </div>
           </div>
+
+          {/* Large rooted watermark */}
+          <div className="absolute right-0 top-0 text-gray-200 text-9xl font-bold opacity-10 pointer-events-none hidden lg:block">
+            rooted
+          </div>
         </div>
 
-        <div className="border-t border-gray-200 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-gray-200 pt-8 pb-8">
+          <div className="text-center">
             <p className="text-[var(--rooted-secondary)] text-sm">© 2025 Rooted. All rights reserved.</p>
-            <div className="text-gray-300 text-8xl font-bold opacity-10 mt-4 md:mt-0">
-              rooted
-            </div>
           </div>
         </div>
       </div>
