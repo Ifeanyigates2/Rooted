@@ -27,7 +27,7 @@ export default function HeroSection() {
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
         <div className="mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-6">
-            <span className="text-2xl font-bold">S</span>
+            <span className="text-2xl font-bold">R</span>
           </div>
         </div>
         
