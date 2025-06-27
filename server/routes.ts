@@ -94,6 +94,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User signup
+  app.post("/api/signup", async (req, res) => {
+    try {
+      const { firstName, lastName, email, phone, password, countryCode } = req.body;
+      
+      if (!firstName || !lastName || !email || !phone || !password) {
+        return res.status(400).json({ error: "All fields are required" });
+      }
+
+      // In a real app, this would:
+      // 1. Hash the password
+      // 2. Save user to database with verified: false
+      // 3. Generate and send OTP via email/SMS
+      // 4. Store OTP temporarily (Redis/cache)
+      
+      // For now, just simulate success
+      res.json({ 
+        message: "Account created successfully. Please check your email for verification code.",
+        userId: "user_" + Date.now()
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create account" });
+    }
+  });
+
+  // Email verification
+  app.post("/api/verify-email", async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+      
+      if (!email || !otp) {
+        return res.status(400).json({ error: "Email and OTP are required" });
+      }
+
+      // In a real app, this would:
+      // 1. Verify OTP against stored value
+      // 2. Update user verified status
+      // 3. Clear OTP from cache
+      
+      // For demo, accept any 4-digit code
+      if (otp.length === 4) {
+        res.json({ message: "Email verified successfully" });
+      } else {
+        res.status(400).json({ error: "Invalid OTP code" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to verify email" });
+    }
+  });
+
+  // Resend OTP
+  app.post("/api/resend-otp", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      // In a real app, this would generate and send a new OTP
+      res.json({ message: "New verification code sent to your email" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to resend verification code" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -3,9 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Account() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -16,14 +21,54 @@ export default function Account() {
     countryCode: "+44"
   });
 
+  const signupMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const response = await apiRequest("POST", "/api/signup", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account created successfully!",
+        description: "Please check your email for verification code.",
+      });
+      setLocation("/verify-email");
+    },
+    onError: () => {
+      toast({
+        title: "Signup failed",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Sign up with:", formData);
-    // TODO: Implement signup functionality
+    
+    // Basic validation
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Password mismatch",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 8 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    signupMutation.mutate(formData);
   };
 
   return (
@@ -140,9 +185,10 @@ export default function Account() {
               {/* Sign up button */}
               <Button
                 type="submit"
+                disabled={signupMutation.isPending}
                 className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg mt-8"
               >
-                Sign up ✨
+                {signupMutation.isPending ? "Creating account..." : "Sign up ✨"}
               </Button>
 
               {/* Sign in link */}
