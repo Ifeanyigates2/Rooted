@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,27 @@ export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [ethnicity, setEthnicity] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Beautiful images of Black American women
+  const heroImages = [
+    "https://images.unsplash.com/photo-1594736797933-d0d0a7347bb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
+    "https://images.unsplash.com/photo-1551836022-d5d88e9218df?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
+    "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200",
+    "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200"
+  ];
+
+  // Auto-advance slideshow every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => 
+        prevIndex === heroImages.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
 
   const handleSearch = () => {
     console.log("Search initiated:", { searchQuery, location, ethnicity });
@@ -15,14 +36,37 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative bg-gray-900 min-h-[70vh] flex items-center justify-center">
-      <div className="absolute inset-0 hero-gradient"></div>
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200')"
-        }}
-      ></div>
+    <section className="relative bg-gray-900 min-h-[70vh] flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 hero-gradient z-20"></div>
+      
+      {/* Slideshow Background */}
+      <div className="absolute inset-0">
+        {heroImages.map((image, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ backgroundImage: `url('${image}')` }}
+          />
+        ))}
+      </div>
+      
+      {/* Slide indicators */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3 z-30">
+        {heroImages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentImageIndex(index)}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              index === currentImageIndex 
+                ? 'bg-white scale-110' 
+                : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
       
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
         <div className="mb-8">
