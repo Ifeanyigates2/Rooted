@@ -205,7 +205,9 @@ export default function Account() {
               {/* Terms */}
               <div className="text-center text-sm text-[var(--rooted-secondary)] mt-6">
                 By Signing up, you have agreed to our{" "}
-                <a href="#" className="text-blue-600 hover:underline">Terms & Conditions</a>
+                <Link href="/terms" className="text-blue-600 hover:underline">Terms & Conditions</Link>
+                {" "}and{" "}
+                <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
               </div>
             </form>
           </div>

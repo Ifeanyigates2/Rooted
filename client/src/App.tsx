@@ -8,6 +8,8 @@ import Account from "@/pages/Account";
 import Login from "@/pages/Login";
 import VerifyEmail from "@/pages/VerifyEmail";
 import CompleteProfile from "@/pages/CompleteProfile";
+import TermsAndConditions from "@/pages/TermsAndConditions";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/complete-profile" component={CompleteProfile} />
+      <Route path="/terms" component={TermsAndConditions} />
+      <Route path="/privacy" component={PrivacyPolicy} />
       <Route component={NotFound} />
     </Switch>
   );
