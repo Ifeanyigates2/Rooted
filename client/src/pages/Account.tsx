@@ -7,7 +7,7 @@ import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import signupImage from "@assets/img 3_1751136160583.jpg";
+import signupImage from "@assets/login sign up_1751136337552.jpg";
 
 export default function Account() {
   const [, setLocation] = useLocation();
@@ -215,7 +215,7 @@ export default function Account() {
             <div className="rounded-3xl overflow-hidden shadow-2xl">
               <img
                 src={signupImage}
-                alt="Diverse group of beautiful women"
+                alt="Two professional women in elegant black and white portrait"
                 className="w-full h-[600px] object-cover"
               />
             </div>
