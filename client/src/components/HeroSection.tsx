@@ -1,13 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Users } from "lucide-react";
 
+// Import the background images
+import img1 from "@assets/img 1_1751131876349.jpg";
+import img2 from "@assets/img 2_1751131876350.jpg";
+import img3 from "@assets/img 3_1751131876350.jpg";
+import img4 from "@assets/img 4_1751131876350.jpg";
+
 export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
   const [ethnicity, setEthnicity] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const backgroundImages = [img1, img2, img3, img4];
+
+  // Auto-advance slider every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
 
   const handleSearch = () => {
     console.log("Search initiated:", { searchQuery, location, ethnicity });
@@ -15,14 +33,23 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative bg-gray-900 min-h-[70vh] flex items-center justify-center">
+    <section className="relative bg-gray-900 min-h-[70vh] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 hero-gradient"></div>
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat" 
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&h=1200')"
-        }}
-      ></div>
+      
+      {/* Background Image Slider */}
+      <div className="absolute inset-0">
+        {backgroundImages.map((image, index) => (
+          <div
+            key={index}
+            className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000 ${
+              index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{
+              backgroundImage: `url('${image}')`
+            }}
+          />
+        ))}
+      </div>
       
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
         <div className="mb-8">
@@ -81,6 +108,22 @@ export default function HeroSection() {
           >
             Find Your Perfect match
           </Button>
+        </div>
+        
+        {/* Slider Indicators */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {backgroundImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentImageIndex 
+                  ? 'bg-white bg-opacity-100' 
+                  : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
     </section>
