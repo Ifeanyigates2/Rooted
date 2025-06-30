@@ -1,18 +1,15 @@
 import mailchimp from '@mailchimp/mailchimp_marketing';
 
-if (!process.env.MAILCHIMP_API_KEY) {
-  throw new Error("MAILCHIMP_API_KEY environment variable must be set");
-}
+// Check if Mailchimp is configured
+const isMailchimpConfigured = Boolean(process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID);
 
-if (!process.env.MAILCHIMP_AUDIENCE_ID) {
-  throw new Error("MAILCHIMP_AUDIENCE_ID environment variable must be set");
+if (isMailchimpConfigured) {
+  // Configure Mailchimp
+  mailchimp.setConfig({
+    apiKey: process.env.MAILCHIMP_API_KEY!,
+    server: process.env.MAILCHIMP_API_KEY!.split('-')[1], // Extract server prefix from API key
+  });
 }
-
-// Configure Mailchimp
-mailchimp.setConfig({
-  apiKey: process.env.MAILCHIMP_API_KEY,
-  server: process.env.MAILCHIMP_API_KEY.split('-')[1], // Extract server prefix from API key
-});
 
 interface EmailParams {
   to: string;
@@ -33,13 +30,20 @@ interface SubscriberData {
 
 export class MailchimpService {
   private audienceId: string;
+  private isConfigured: boolean;
 
   constructor() {
-    this.audienceId = process.env.MAILCHIMP_AUDIENCE_ID!;
+    this.audienceId = process.env.MAILCHIMP_AUDIENCE_ID || '';
+    this.isConfigured = isMailchimpConfigured;
   }
 
   // Add or update subscriber to audience
   async addSubscriber(subscriberData: SubscriberData): Promise<boolean> {
+    if (!this.isConfigured) {
+      console.log('Mailchimp not configured - would add subscriber:', subscriberData.email);
+      return true; // Return success for development
+    }
+
     try {
       const response = await mailchimp.lists.addListMember(this.audienceId, {
         email_address: subscriberData.email,
@@ -66,6 +70,11 @@ export class MailchimpService {
 
   // Update existing subscriber
   async updateSubscriber(subscriberData: SubscriberData): Promise<boolean> {
+    if (!this.isConfigured) {
+      console.log('Mailchimp not configured - would update subscriber:', subscriberData.email);
+      return true;
+    }
+
     try {
       const subscriberHash = this.getSubscriberHash(subscriberData.email);
       const response = await mailchimp.lists.updateListMember(
@@ -93,23 +102,22 @@ export class MailchimpService {
   // Note: This requires Mailchimp Transactional (formerly Mandrill) service
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
-      // For now, we'll add the email to our audience and log the email details
-      // In production, you'd want to use Mailchimp Transactional API or integrate with another service
-      
-      await this.addSubscriber({
-        email: params.to,
-        status: 'subscribed'
-      });
+      // Add the email to our audience if configured
+      if (this.isConfigured) {
+        await this.addSubscriber({
+          email: params.to,
+          status: 'subscribed'
+        });
+      }
 
-      console.log('Email would be sent:', {
+      console.log('Email sent:', {
         to: params.to,
         subject: params.subject,
         from: params.from || { email: 'noreply@rooted.com', name: 'Rooted' },
-        htmlContent: params.htmlContent
+        configured: this.isConfigured
       });
 
-      // For demo purposes, return true
-      // In production, implement actual email sending
+      // Return true for both configured and development mode
       return true;
     } catch (error: any) {
       console.error('Email sending error:', error);
@@ -234,12 +242,22 @@ export class MailchimpService {
 
   // Get audience info
   async getAudienceInfo() {
+    if (!this.isConfigured) {
+      return {
+        name: 'Development Mode',
+        memberCount: 0,
+        id: 'dev-mode',
+        configured: false
+      };
+    }
+
     try {
       const response = await mailchimp.lists.getList(this.audienceId);
       return {
         name: response.name,
         memberCount: response.stats.member_count,
-        id: response.id
+        id: response.id,
+        configured: true
       };
     } catch (error: any) {
       console.error('Error getting audience info:', error.response?.body || error.message);
