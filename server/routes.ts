@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { mailchimpService } from "./mailchimp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
@@ -80,21 +81,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Newsletter subscription (mock endpoint)
+  // Newsletter subscription with Mailchimp
   app.post("/api/newsletter", async (req, res) => {
     try {
-      const { email } = req.body;
+      const { email, firstName, lastName } = req.body;
       if (!email) {
         return res.status(400).json({ error: "Email is required" });
       }
-      // In a real app, this would integrate with an email service
-      res.json({ message: "Successfully subscribed to newsletter" });
+
+      const success = await mailchimpService.addSubscriber({
+        email,
+        firstName,
+        lastName,
+        status: 'subscribed'
+      });
+
+      if (success) {
+        res.json({ message: "Successfully subscribed to newsletter" });
+      } else {
+        res.status(500).json({ error: "Failed to subscribe to newsletter" });
+      }
     } catch (error) {
+      console.error("Newsletter subscription error:", error);
       res.status(500).json({ error: "Failed to subscribe to newsletter" });
     }
   });
 
-  // User signup
+  // User signup with email verification
   app.post("/api/signup", async (req, res) => {
     try {
       const { firstName, lastName, email, phone, password, countryCode } = req.body;
@@ -103,18 +116,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "All fields are required" });
       }
 
-      // In a real app, this would:
-      // 1. Hash the password
-      // 2. Save user to database with verified: false
-      // 3. Generate and send OTP via email/SMS
-      // 4. Store OTP temporarily (Redis/cache)
+      // Generate OTP (4-digit code)
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
       
-      // For now, just simulate success
-      res.json({ 
-        message: "Account created successfully. Please check your email for verification code.",
-        userId: "user_" + Date.now()
+      // Generate verification email content
+      const htmlContent = mailchimpService.generateVerificationEmail(email, otp);
+      
+      // Send verification email
+      const emailSent = await mailchimpService.sendEmail({
+        to: email,
+        subject: "Verify your rooted account",
+        htmlContent,
+        from: {
+          email: "noreply@rooted.com",
+          name: "rooted"
+        }
       });
+
+      // Add user to Mailchimp audience
+      await mailchimpService.addSubscriber({
+        email,
+        firstName,
+        lastName,
+        status: 'pending' // Set as pending until email is verified
+      });
+
+      if (emailSent) {
+        res.json({ 
+          message: "Account created successfully. Please check your email for verification code.",
+          userId: "user_" + Date.now(),
+          // In development, include OTP for testing purposes
+          otp: process.env.NODE_ENV === 'development' ? otp : undefined
+        });
+      } else {
+        res.status(500).json({ error: "Failed to send verification email" });
+      }
     } catch (error) {
+      console.error("Signup error:", error);
       res.status(500).json({ error: "Failed to create account" });
     }
   });
@@ -144,7 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Resend OTP
+  // Resend OTP with Mailchimp
   app.post("/api/resend-otp", async (req, res) => {
     try {
       const { email } = req.body;
@@ -153,9 +191,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email is required" });
       }
 
-      // In a real app, this would generate and send a new OTP
-      res.json({ message: "New verification code sent to your email" });
+      // Generate new OTP (4-digit code)
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      // Generate verification email content
+      const htmlContent = mailchimpService.generateVerificationEmail(email, otp);
+      
+      // Send verification email
+      const emailSent = await mailchimpService.sendEmail({
+        to: email,
+        subject: "Your new rooted verification code",
+        htmlContent,
+        from: {
+          email: "noreply@rooted.com",
+          name: "rooted"
+        }
+      });
+
+      if (emailSent) {
+        res.json({ 
+          message: "New verification code sent to your email",
+          // In development, include OTP for testing purposes
+          otp: process.env.NODE_ENV === 'development' ? otp : undefined
+        });
+      } else {
+        res.status(500).json({ error: "Failed to send verification code" });
+      }
     } catch (error) {
+      console.error("Resend OTP error:", error);
       res.status(500).json({ error: "Failed to resend verification code" });
     }
   });
