@@ -282,6 +282,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test Mailchimp endpoint
+  app.post("/api/test-mailchimp", async (req, res) => {
+    try {
+      const { email, firstName, lastName } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      // Test subscriber addition
+      const subscribeResult = await mailchimpService.addSubscriber({
+        email,
+        firstName: firstName || 'Test',
+        lastName: lastName || 'User',
+        status: 'subscribed'
+      });
+
+      // Test email sending
+      const emailResult = await mailchimpService.sendEmail({
+        to: email,
+        subject: "Test email from rooted",
+        htmlContent: `<h1>Test Email</h1><p>This is a test email from rooted marketplace.</p>`,
+        from: {
+          email: "test@rooted.com",
+          name: "rooted Test"
+        }
+      });
+
+      // Get audience info
+      const audienceInfo = await mailchimpService.getAudienceInfo();
+
+      res.json({
+        subscribeResult,
+        emailResult,
+        audienceInfo,
+        message: "Mailchimp test completed"
+      });
+    } catch (error) {
+      console.error("Mailchimp test error:", error);
+      res.status(500).json({ message: "Mailchimp test failed", error: String(error) });
+    }
+  });
+
+  // Get Mailchimp audience info (for admin)
+  app.get("/api/audience-info", async (req, res) => {
+    try {
+      const info = await mailchimpService.getAudienceInfo();
+      res.json(info);
+    } catch (error) {
+      console.error("Audience info error:", error);
+      res.status(500).json({ message: "Failed to get audience info" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

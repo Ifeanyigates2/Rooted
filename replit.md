@@ -92,9 +92,30 @@ This is a modern full-stack web application for connecting customers with beauty
 - **Module System**: ES modules throughout the application
 - **Build Scripts**: Separate development, build, and production start commands
 
+## Recent Changes
+
+### December 30, 2025 - Mailchimp Email Integration
+- Integrated Mailchimp API for email functionality
+- Added email verification system for user signup
+- Created newsletter subscription with Mailchimp audience management
+- Added email templates for verification and welcome messages
+- Configured graceful fallback for development without API keys
+- Updated signup flow to send verification emails automatically
+- Added resend OTP functionality with Mailchimp
+- Created test endpoints for Mailchimp integration verification
+
+### Key Email Features Added:
+- **Email Verification**: OTP codes sent via Mailchimp on signup
+- **Newsletter Subscription**: Users added to Mailchimp audience
+- **Transactional Emails**: Welcome emails and verification messages
+- **Development Mode**: Works without API keys for testing
+- **Email Templates**: Professional HTML templates with rooted branding
+
 ## Changelog
 - June 27, 2025. Initial setup
+- December 30, 2025. Mailchimp email integration complete
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Email service: Mailchimp (configured for audience management and transactional emails)
