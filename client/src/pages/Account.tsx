@@ -19,7 +19,7 @@ export default function Account() {
     phone: "",
     password: "",
     confirmPassword: "",
-    countryCode: "+44"
+    countryCode: "+234"
   });
 
   const signupMutation = useMutation({
@@ -130,6 +130,7 @@ export default function Account() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="+234">🇳🇬 +234</SelectItem>
                     <SelectItem value="+44">🇬🇧 +44</SelectItem>
                     <SelectItem value="+1">🇺🇸 +1</SelectItem>
                     <SelectItem value="+33">🇫🇷 +33</SelectItem>
