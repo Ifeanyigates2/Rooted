@@ -111,7 +111,7 @@ export default function CompleteProfile() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-2xl font-bold text-gray-600">R</span>
+                      <Camera className="h-8 w-8 text-gray-400" />
                     )}
                   </div>
                   <input
