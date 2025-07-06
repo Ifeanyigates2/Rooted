@@ -139,6 +139,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "All fields including user type, country, and area are required" });
       }
 
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "User with this email already exists" });
+      }
+
+      // Generate unique user ID
+      const userId = userType + "_" + Date.now();
+
+      // Create user in database
+      const newUser = await storage.upsertUser({
+        id: userId,
+        email,
+        firstName,
+        lastName,
+        phone: countryCode + " " + phone,
+        password, // In production, this would be hashed
+        userType,
+        country,
+        area,
+        verified: false,
+        businessName: userType === "provider" ? `${firstName} ${lastName}'s Studio` : undefined
+      });
+
+      // If provider, also create provider record
+      if (userType === "provider") {
+        await storage.createProvider({
+          userId: userId,
+          name: `${firstName} ${lastName}`,
+          businessName: `${firstName} ${lastName}'s Studio`,
+          location: area,
+          country,
+          localGovernment: area, // Using area as localGovernment for now
+          rating: "5.0",
+          reviewCount: 0,
+          startingPrice: "50.00",
+          categoryId: 1, // Default to Hair category
+          specialties: [],
+          verified: false
+        });
+      }
+
       // Generate OTP (4-digit code)
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
       
@@ -167,7 +209,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (emailSent) {
         res.json({ 
           message: "Account created successfully. Please check your email for verification code.",
-          userId: "user_" + Date.now(),
+          userId: newUser.id,
+          userType: userType,
           // In development, include OTP for testing purposes
           otp: process.env.NODE_ENV === 'development' ? otp : undefined
         });
@@ -175,8 +218,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(500).json({ error: "Failed to send verification email" });
       }
     } catch (error) {
-      console.error("Signup error:", error);
-      res.status(500).json({ error: "Failed to create account" });
+      console.error("Detailed signup error:", error);
+      res.status(500).json({ error: "Failed to create account", details: error.message });
     }
   });
 
