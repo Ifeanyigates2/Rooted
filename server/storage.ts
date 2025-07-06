@@ -4,10 +4,10 @@ import { eq, like, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for authentication)
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  updateUser(id: number, updates: Partial<User>): Promise<User>;
+  updateUser(id: string, updates: Partial<User>): Promise<User>;
 
   // Categories
   getCategories(): Promise<Category[]>;
@@ -19,7 +19,7 @@ export interface IStorage {
   getProvidersByCategory(categoryId: number): Promise<Provider[]>;
   getTopRatedProviders(limit?: number): Promise<Provider[]>;
   getProviderById(id: number): Promise<Provider | undefined>;
-  getProviderByUserId(userId: number): Promise<Provider | undefined>;
+  getProviderByUserId(userId: string): Promise<Provider | undefined>;
   createProvider(provider: InsertProvider): Promise<Provider>;
 
   // Services
@@ -359,7 +359,7 @@ export class MemStorage implements IStorage {
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
@@ -384,7 +384,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: number, updates: Partial<User>): Promise<User> {
+  async updateUser(id: string, updates: Partial<User>): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ ...updates, updatedAt: new Date() })
@@ -426,7 +426,7 @@ export class DatabaseStorage implements IStorage {
     return provider || undefined;
   }
 
-  async getProviderByUserId(userId: number): Promise<Provider | undefined> {
+  async getProviderByUserId(userId: string): Promise<Provider | undefined> {
     const [provider] = await db.select().from(providers).where(eq(providers.userId, userId));
     return provider || undefined;
   }

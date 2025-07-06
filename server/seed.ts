@@ -30,6 +30,7 @@ async function seed() {
     // Seed Users
     const userData = [
       {
+        id: "provider_1",
         email: "kdhair@example.com",
         firstName: "Kimberly",
         lastName: "Davis",
@@ -41,6 +42,7 @@ async function seed() {
         verified: true,
       },
       {
+        id: "provider_2",
         email: "beautybyjess@example.com",
         firstName: "Jessica",
         lastName: "Thompson",
@@ -52,6 +54,7 @@ async function seed() {
         verified: true,
       },
       {
+        id: "provider_3",
         email: "nailartpro@example.com",
         firstName: "Sophie",
         lastName: "Williams",

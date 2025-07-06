@@ -329,43 +329,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email, password, and user type are required" });
       }
 
-      // In a real app, this would validate password hash
-      // For demo, we'll create a realistic user based on the email
+      // Find user by email in the database
+      const user = await storage.getUserByEmail(email);
       
-      let userData;
-      
-      if (userType === "provider") {
-        // Extract first name from email (before @)
-        const emailUser = email.split('@')[0];
-        const firstName = emailUser.charAt(0).toUpperCase() + emailUser.slice(1);
-        
-        userData = {
-          id: "provider_" + Date.now(),
-          email: email,
-          firstName: firstName,
-          lastName: "Provider",
-          userType: "provider",
-          businessName: `${firstName}'s Beauty Studio`,
-          verified: true,
-          profileCompleted: true
-        };
-      } else {
-        // Extract first name from email (before @)
-        const emailUser = email.split('@')[0];
-        const firstName = emailUser.charAt(0).toUpperCase() + emailUser.slice(1);
-        
-        userData = {
-          id: "customer_" + Date.now(),
-          email: email,
-          firstName: firstName,
-          lastName: "Customer",
-          userType: "customer",
-          profileCompleted: true
-        };
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
       }
       
+      // Check if user type matches
+      if (user.userType !== userType) {
+        return res.status(400).json({ error: "Invalid user type for this account" });
+      }
+      
+      // In a real app, this would validate password hash
+      // For demo, we check against the stored password
+      if (user.password !== password) {
+        return res.status(401).json({ error: "Invalid password" });
+      }
+      
+      // Prepare user data for session
+      const userData = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        userType: user.userType,
+        businessName: user.businessName,
+        verified: user.verified,
+        profileCompleted: true
+      };
+      
       // Store session data for this user
-      const sessionId = userData.id;
+      const sessionId = user.id;
       activeSessions.set(sessionId, userData);
       
       res.json({ 
@@ -374,6 +369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sessionId: sessionId
       });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ error: "Failed to login" });
     }
   });

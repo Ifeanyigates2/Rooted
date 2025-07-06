@@ -15,7 +15,7 @@ export const sessions = pgTable(
 
 // Users table for authentication and profile management
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: varchar("id").primaryKey(),
   email: varchar("email").unique().notNull(),
   firstName: varchar("first_name").notNull(),
   lastName: varchar("last_name").notNull(),
@@ -38,7 +38,7 @@ export const categories = pgTable("categories", {
 
 export const providers = pgTable("providers", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
   name: text("name").notNull(),
   businessName: text("business_name"),
   location: text("location").notNull(),
