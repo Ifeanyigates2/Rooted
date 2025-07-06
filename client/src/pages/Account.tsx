@@ -22,6 +22,8 @@ export default function Account() {
     password: "",
     confirmPassword: "",
     countryCode: "+234",
+    country: "",
+    area: "",
     userType: ""
   });
 
@@ -261,6 +263,33 @@ export default function Account() {
                   value={formData.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
                   className="flex-1 bg-gray-100 border-0 rounded-xl py-3 px-4 text-[var(--rooted-primary)] placeholder:text-gray-500"
+                  required
+                />
+              </div>
+
+              {/* Country and Area fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <Select value={formData.country} onValueChange={(value) => handleInputChange("country", value)}>
+                  <SelectTrigger className="bg-gray-100 border-0 rounded-xl py-3 px-4">
+                    <SelectValue placeholder="Select Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nigeria">🇳🇬 Nigeria</SelectItem>
+                    <SelectItem value="uk">🇬🇧 United Kingdom</SelectItem>
+                    <SelectItem value="usa">🇺🇸 United States</SelectItem>
+                    <SelectItem value="canada">🇨🇦 Canada</SelectItem>
+                    <SelectItem value="france">🇫🇷 France</SelectItem>
+                    <SelectItem value="germany">🇩🇪 Germany</SelectItem>
+                    <SelectItem value="australia">🇦🇺 Australia</SelectItem>
+                    <SelectItem value="south_africa">🇿🇦 South Africa</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="text"
+                  placeholder="Enter your area"
+                  value={formData.area}
+                  onChange={(e) => handleInputChange("area", e.target.value)}
+                  className="bg-gray-100 border-0 rounded-xl py-3 px-4 text-[var(--rooted-primary)] placeholder:text-gray-500"
                   required
                 />
               </div>

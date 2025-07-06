@@ -24,6 +24,8 @@ export const users = pgTable("users", {
   bio: text("bio"),
   password: varchar("password").notNull(), // In production, this would be hashed
   userType: varchar("user_type").notNull(), // "customer" or "provider"
+  country: varchar("country"),
+  area: varchar("area"),
   verified: boolean("verified").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

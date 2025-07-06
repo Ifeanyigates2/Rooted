@@ -133,10 +133,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User signup with email verification
   app.post("/api/signup", async (req, res) => {
     try {
-      const { firstName, lastName, email, phone, password, countryCode, userType } = req.body;
+      const { firstName, lastName, email, phone, password, countryCode, country, area, userType } = req.body;
       
-      if (!firstName || !lastName || !email || !phone || !password || !userType) {
-        return res.status(400).json({ error: "All fields including user type are required" });
+      if (!firstName || !lastName || !email || !phone || !password || !country || !area || !userType) {
+        return res.status(400).json({ error: "All fields including user type, country, and area are required" });
       }
 
       // Generate OTP (4-digit code)
