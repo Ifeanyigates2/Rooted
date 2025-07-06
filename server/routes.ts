@@ -345,6 +345,174 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Provider dashboard endpoints
+  app.get("/api/provider/me", async (req, res) => {
+    try {
+      // In a real app, this would:
+      // 1. Get user ID from session/JWT
+      // 2. Find provider by user ID
+      // 3. Return provider profile
+      
+      // For demo, return a mock provider profile
+      const mockProvider = {
+        id: 1,
+        name: "Sarah Johnson",
+        businessName: "Sarah's Beauty Studio",
+        email: "sarah@beautymail.com",
+        phone: "+44 20 1234 5678",
+        location: "Westminster, London",
+        country: "United Kingdom",
+        localGovernment: "Westminster",
+        bio: "Expert hair stylist and colorist with 10+ years experience",
+        specialties: ["Hair Styling", "Hair Coloring", "Bridal Hair"],
+        rating: 4.8,
+        reviewCount: 127,
+        startingPrice: 45,
+        imageUrl: "https://images.unsplash.com/photo-1594736797933-d0b22c6e8daa?w=400&h=400&fit=crop",
+        verified: true,
+        categoryId: 1,
+        instagramHandle: "@sarahbeautystudio",
+        portfolioImages: ["https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop"],
+        trending: false,
+        joinDate: "2023-01-15"
+      };
+      
+      res.json(mockProvider);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch provider profile" });
+    }
+  });
+
+  app.get("/api/provider/services", async (req, res) => {
+    try {
+      // In a real app, this would:
+      // 1. Get user ID from session/JWT
+      // 2. Find provider by user ID
+      // 3. Get services for that provider
+      
+      // For demo, return mock services for the provider
+      const mockServices = [
+        {
+          id: 1,
+          name: "Classic Haircut & Blow Dry",
+          description: "Professional haircut with styling and blow dry finish",
+          price: 45,
+          duration: 60,
+          categoryId: 1,
+          providerId: 1,
+          imageUrl: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop",
+          trending: false
+        },
+        {
+          id: 2,
+          name: "Full Hair Color Service",
+          description: "Complete hair coloring service with consultation and aftercare",
+          price: 120,
+          duration: 180,
+          categoryId: 1,
+          providerId: 1,
+          imageUrl: "https://images.unsplash.com/photo-1559599101-f09722fb4948?w=400&h=400&fit=crop",
+          trending: true
+        },
+        {
+          id: 3,
+          name: "Bridal Hair Styling",
+          description: "Elegant bridal hair styling for your special day",
+          price: 85,
+          duration: 120,
+          categoryId: 1,
+          providerId: 1,
+          imageUrl: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=400&h=400&fit=crop",
+          trending: false
+        }
+      ];
+      
+      res.json(mockServices);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch provider services" });
+    }
+  });
+
+  app.post("/api/services", async (req, res) => {
+    try {
+      const { name, description, price, duration, categoryId, imageUrl } = req.body;
+      
+      if (!name || !price || !categoryId) {
+        return res.status(400).json({ error: "Name, price, and category are required" });
+      }
+      
+      // In a real app, this would:
+      // 1. Get user ID from session/JWT
+      // 2. Find provider by user ID
+      // 3. Create service with provider ID
+      // 4. Store in database
+      
+      // For demo, return mock created service
+      const newService = {
+        id: Date.now(),
+        name,
+        description: description || "",
+        price: Number(price),
+        duration: duration ? Number(duration) : null,
+        categoryId: Number(categoryId),
+        providerId: 1, // Mock provider ID
+        imageUrl: imageUrl || "",
+        trending: false
+      };
+      
+      res.json(newService);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create service" });
+    }
+  });
+
+  app.patch("/api/services/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, description, price, duration, categoryId, imageUrl } = req.body;
+      
+      // In a real app, this would:
+      // 1. Get user ID from session/JWT
+      // 2. Find provider by user ID
+      // 3. Verify service belongs to provider
+      // 4. Update service in database
+      
+      // For demo, return mock updated service
+      const updatedService = {
+        id: Number(id),
+        name,
+        description: description || "",
+        price: Number(price),
+        duration: duration ? Number(duration) : null,
+        categoryId: Number(categoryId),
+        providerId: 1, // Mock provider ID
+        imageUrl: imageUrl || "",
+        trending: false
+      };
+      
+      res.json(updatedService);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update service" });
+    }
+  });
+
+  app.delete("/api/services/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // In a real app, this would:
+      // 1. Get user ID from session/JWT
+      // 2. Find provider by user ID
+      // 3. Verify service belongs to provider
+      // 4. Delete service from database
+      
+      // For demo, just return success
+      res.json({ message: "Service deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete service" });
+    }
+  });
+
   // Test Mailchimp endpoint
   app.post("/api/test-mailchimp", async (req, res) => {
     try {
