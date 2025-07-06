@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { mailchimpService } from "./mailchimp";
-import { gmailService } from "./gmail";
+import { resendService } from "./resend";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
@@ -136,15 +136,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
       
       // Generate verification email content
-      const htmlContent = gmailService.generateVerificationEmail(email, otp);
+      const htmlContent = resendService.generateVerificationEmail(email, otp);
       
       // Send verification email
-      const emailSent = await gmailService.sendEmail({
+      const emailSent = await resendService.sendEmail({
         to: email,
         subject: "Verify your rooted account",
         htmlContent,
         from: {
-          email: "noreply@rooted.com",
+          email: "onboarding@resend.dev",
           name: "rooted"
         }
       });
@@ -211,15 +211,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
       
       // Generate verification email content
-      const htmlContent = gmailService.generateVerificationEmail(email, otp);
+      const htmlContent = resendService.generateVerificationEmail(email, otp);
       
       // Send verification email
-      const emailSent = await gmailService.sendEmail({
+      const emailSent = await resendService.sendEmail({
         to: email,
         subject: "Your new rooted verification code",
         htmlContent,
         from: {
-          email: "noreply@rooted.com",
+          email: "onboarding@resend.dev",
           name: "rooted"
         }
       });
@@ -399,29 +399,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test Gmail integration
-  app.get("/api/test-gmail", async (req, res) => {
+  // Test Resend integration
+  app.get("/api/test-resend", async (req, res) => {
     try {
-      console.log("Testing Gmail integration...");
+      console.log("Testing Resend integration...");
       
       // Test sending email
-      const testEmailSent = await gmailService.sendEmail({
-        to: "test@example.com",
+      const testEmailSent = await resendService.sendEmail({
+        to: "test@resend.dev",
         subject: "Test Email from rooted",
-        htmlContent: gmailService.generateVerificationEmail("test@example.com", "1234"),
+        htmlContent: resendService.generateVerificationEmail("test@resend.dev", "1234"),
         from: {
-          email: "noreply@rooted.com",
+          email: "onboarding@resend.dev",
           name: "rooted"
         }
       });
       
       res.json({ 
-        message: "Gmail test completed",
+        message: "Resend test completed",
         emailSent: testEmailSent
       });
     } catch (error) {
-      console.error("Gmail test error:", error);
-      res.status(500).json({ error: "Gmail test failed" });
+      console.error("Resend test error:", error);
+      res.status(500).json({ error: "Resend test failed" });
     }
   });
 
