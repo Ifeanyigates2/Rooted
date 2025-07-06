@@ -1,6 +1,14 @@
-import { categories, providers, services, type Category, type Provider, type Service, type InsertCategory, type InsertProvider, type InsertService } from "@shared/schema";
+import { categories, providers, services, users, type Category, type Provider, type Service, type InsertCategory, type InsertProvider, type InsertService, type User, type UpsertUser } from "@shared/schema";
+import { db } from "./db";
+import { eq, like, desc, and } from "drizzle-orm";
 
 export interface IStorage {
+  // User operations (required for authentication)
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User>;
+
   // Categories
   getCategories(): Promise<Category[]>;
   getCategoryById(id: number): Promise<Category | undefined>;
@@ -11,6 +19,7 @@ export interface IStorage {
   getProvidersByCategory(categoryId: number): Promise<Provider[]>;
   getTopRatedProviders(limit?: number): Promise<Provider[]>;
   getProviderById(id: number): Promise<Provider | undefined>;
+  getProviderByUserId(userId: number): Promise<Provider | undefined>;
   createProvider(provider: InsertProvider): Promise<Provider>;
 
   // Services
@@ -19,6 +28,8 @@ export interface IStorage {
   getTrendingServices(limit?: number): Promise<Service[]>;
   getServiceById(id: number): Promise<Service | undefined>;
   createService(service: InsertService): Promise<Service>;
+  updateService(id: number, updates: Partial<Service>): Promise<Service>;
+  deleteService(id: number): Promise<void>;
 
   // Search
   searchProviders(query: string, location?: string, categoryId?: number): Promise<Provider[]>;
@@ -346,4 +357,161 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.email,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  // Categories
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories);
+  }
+
+  async getCategoryById(id: number): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.id, id));
+    return category || undefined;
+  }
+
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const [newCategory] = await db.insert(categories).values(category).returning();
+    return newCategory;
+  }
+
+  // Providers
+  async getProviders(): Promise<Provider[]> {
+    return await db.select().from(providers);
+  }
+
+  async getProvidersByCategory(categoryId: number): Promise<Provider[]> {
+    return await db.select().from(providers).where(eq(providers.categoryId, categoryId));
+  }
+
+  async getTopRatedProviders(limit = 10): Promise<Provider[]> {
+    return await db.select().from(providers).orderBy(desc(providers.rating)).limit(limit);
+  }
+
+  async getProviderById(id: number): Promise<Provider | undefined> {
+    const [provider] = await db.select().from(providers).where(eq(providers.id, id));
+    return provider || undefined;
+  }
+
+  async getProviderByUserId(userId: number): Promise<Provider | undefined> {
+    const [provider] = await db.select().from(providers).where(eq(providers.userId, userId));
+    return provider || undefined;
+  }
+
+  async createProvider(provider: InsertProvider): Promise<Provider> {
+    const [newProvider] = await db.insert(providers).values(provider).returning();
+    return newProvider;
+  }
+
+  // Services
+  async getServices(): Promise<Service[]> {
+    return await db.select().from(services);
+  }
+
+  async getServicesByProvider(providerId: number): Promise<Service[]> {
+    return await db.select().from(services).where(eq(services.providerId, providerId));
+  }
+
+  async getTrendingServices(limit = 10): Promise<Service[]> {
+    return await db.select().from(services).where(eq(services.trending, true)).limit(limit);
+  }
+
+  async getServiceById(id: number): Promise<Service | undefined> {
+    const [service] = await db.select().from(services).where(eq(services.id, id));
+    return service || undefined;
+  }
+
+  async createService(service: InsertService): Promise<Service> {
+    const [newService] = await db.insert(services).values(service).returning();
+    return newService;
+  }
+
+  async updateService(id: number, updates: Partial<Service>): Promise<Service> {
+    const [service] = await db
+      .update(services)
+      .set(updates)
+      .where(eq(services.id, id))
+      .returning();
+    return service;
+  }
+
+  async deleteService(id: number): Promise<void> {
+    await db.delete(services).where(eq(services.id, id));
+  }
+
+  // Search
+  async searchProviders(query: string, location?: string, categoryId?: number): Promise<Provider[]> {
+    let conditions = [];
+    
+    if (query) {
+      conditions.push(like(providers.name, `%${query}%`));
+    }
+    
+    if (location) {
+      conditions.push(like(providers.location, `%${location}%`));
+    }
+    
+    if (categoryId) {
+      conditions.push(eq(providers.categoryId, categoryId));
+    }
+
+    if (conditions.length === 0) {
+      return await db.select().from(providers);
+    }
+
+    return await db.select().from(providers).where(and(...conditions));
+  }
+
+  async searchServices(query: string, location?: string, categoryId?: number): Promise<Service[]> {
+    let conditions = [];
+    
+    if (query) {
+      conditions.push(like(services.name, `%${query}%`));
+    }
+    
+    if (categoryId) {
+      conditions.push(eq(services.categoryId, categoryId));
+    }
+
+    if (conditions.length === 0) {
+      return await db.select().from(services);
+    }
+
+    return await db.select().from(services).where(and(...conditions));
+  }
+}
+
+export const storage = new DatabaseStorage();

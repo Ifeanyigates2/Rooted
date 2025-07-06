@@ -381,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Provider dashboard endpoints
   app.get("/api/provider/me", async (req, res) => {
     try {
-      // Get session ID from headers (in a real app, this would be from JWT or session cookie)
+      // Get session ID from headers
       const sessionId = req.headers['x-session-id'] as string;
       
       if (!sessionId) {
@@ -395,32 +395,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid provider session" });
       }
       
-      // Build provider profile from session data
+      // Get the actual user from the database
+      const user = await storage.getUser(userData.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Get the provider profile from the database
+      let provider = await storage.getProviderByUserId(user.id);
+      
+      if (!provider) {
+        // Create a provider profile if it doesn't exist
+        provider = await storage.createProvider({
+          userId: user.id,
+          name: `${user.firstName} ${user.lastName}`,
+          businessName: user.businessName || `${user.firstName}'s Beauty Services`,
+          location: "London, United Kingdom",
+          country: "United Kingdom",
+          localGovernment: "Westminster",
+          imageUrl: "https://images.unsplash.com/photo-1594736797933-d0b22c6e8daa?w=400&h=400&fit=crop",
+          rating: "4.5",
+          reviewCount: 0,
+          startingPrice: "30.00",
+          categoryId: 1,
+          specialties: ["Beauty Services"],
+          verified: user.verified || false,
+        });
+      }
+      
+      // Build comprehensive provider profile
       const providerProfile = {
-        id: userData.id,
-        name: `${userData.firstName} ${userData.lastName}`,
-        businessName: userData.businessName,
-        email: userData.email,
-        phone: "+234 123 456 7890", // Default phone for demo
-        location: "Lagos, Nigeria", // Default location
-        country: "Nigeria",
-        localGovernment: "Lagos",
-        bio: `Professional beauty specialist with expertise in various services`,
-        specialties: ["Hair Styling", "Beauty Treatments", "Wellness Services"],
-        rating: 4.5,
-        reviewCount: 25,
-        startingPrice: 30,
-        imageUrl: "https://images.unsplash.com/photo-1594736797933-d0b22c6e8daa?w=400&h=400&fit=crop",
-        verified: userData.verified || false,
-        categoryId: 1,
-        instagramHandle: `@${userData.firstName.toLowerCase()}beauty`,
+        id: provider.id,
+        name: `${user.firstName} ${user.lastName}`,
+        businessName: user.businessName || provider.businessName,
+        email: user.email,
+        phone: user.phone || "+44 20 1234 5678",
+        bio: user.bio || "Professional beauty specialist with expertise in various services",
+        location: provider.location,
+        country: provider.country,
+        localGovernment: provider.localGovernment,
+        specialties: provider.specialties || ["Beauty Services"],
+        rating: parseFloat(provider.rating),
+        reviewCount: provider.reviewCount,
+        startingPrice: parseFloat(provider.startingPrice),
+        imageUrl: provider.imageUrl,
+        verified: provider.verified,
+        categoryId: provider.categoryId,
+        instagramHandle: `@${user.firstName.toLowerCase()}beauty`,
         portfolioImages: ["https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop"],
         trending: false,
-        joinDate: new Date().toISOString().split('T')[0]
+        joinDate: user.createdAt?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0]
       };
       
       res.json(providerProfile);
     } catch (error) {
+      console.error("Error fetching provider profile:", error);
       res.status(500).json({ error: "Failed to fetch provider profile" });
     }
   });
@@ -441,48 +470,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid provider session" });
       }
       
-      // Get or initialize services for this provider
-      let services = providerServices.get(userData.id);
+      // Get the provider profile from the database
+      const provider = await storage.getProviderByUserId(userData.id);
       
-      if (!services) {
-        // Initialize with default services for new providers
-        services = [
-          {
-            id: 1,
-            name: "Classic Haircut & Blow Dry",
-            description: "Professional haircut with styling and blow dry finish",
-            price: 45,
-            duration: 60,
-            categoryId: 1,
-            providerId: userData.id,
-            imageUrl: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop",
-            trending: false
-          },
-          {
-            id: 2,
-            name: "Full Hair Color Service",
-            description: "Complete hair coloring service with consultation and aftercare",
-            price: 120,
-            duration: 180,
-            categoryId: 1,
-            providerId: userData.id,
-            imageUrl: "https://images.unsplash.com/photo-1559599101-f09722fb4948?w=400&h=400&fit=crop",
-            trending: true
-          },
-          {
-            id: 3,
-            name: "Bridal Hair Styling",
-            description: "Elegant bridal hair styling for your special day",
-            price: 85,
-            duration: 120,
-            categoryId: 1,
-            providerId: userData.id,
-            imageUrl: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=400&h=400&fit=crop",
-            trending: false
-          }
-        ];
-        providerServices.set(userData.id, services);
+      if (!provider) {
+        return res.status(404).json({ error: "Provider profile not found" });
       }
+      
+      // Get services for this provider from the database
+      const services = await storage.getServicesByProvider(provider.id);
       
       res.json(services);
     } catch (error) {
@@ -498,27 +494,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Name, price, and category are required" });
       }
       
-      // In a real app, this would:
-      // 1. Get user ID from session/JWT
-      // 2. Find provider by user ID
-      // 3. Create service with provider ID
-      // 4. Store in database
+      // Get session ID from headers
+      const sessionId = req.headers['x-session-id'] as string;
       
-      // For demo, return mock created service
-      const newService = {
-        id: Date.now(),
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
+      
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      // Get the provider profile from the database
+      const provider = await storage.getProviderByUserId(userData.id);
+      
+      if (!provider) {
+        return res.status(404).json({ error: "Provider profile not found" });
+      }
+      
+      // Create service in database
+      const newService = await storage.createService({
         name,
         description: description || "",
-        price: Number(price),
-        duration: duration ? Number(duration) : null,
+        price: price.toString(),
+        duration: duration ? Number(duration) : 60,
         categoryId: Number(categoryId),
-        providerId: 1, // Mock provider ID
-        imageUrl: imageUrl || "",
+        providerId: provider.id,
+        imageUrl: imageUrl || "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop",
         trending: false
-      };
+      });
       
       res.json(newService);
     } catch (error) {
+      console.error("Error creating service:", error);
       res.status(500).json({ error: "Failed to create service" });
     }
   });
@@ -528,27 +539,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { name, description, price, duration, categoryId, imageUrl } = req.body;
       
-      // In a real app, this would:
-      // 1. Get user ID from session/JWT
-      // 2. Find provider by user ID
-      // 3. Verify service belongs to provider
-      // 4. Update service in database
+      // Get session ID from headers
+      const sessionId = req.headers['x-session-id'] as string;
       
-      // For demo, return mock updated service
-      const updatedService = {
-        id: Number(id),
-        name,
-        description: description || "",
-        price: Number(price),
-        duration: duration ? Number(duration) : null,
-        categoryId: Number(categoryId),
-        providerId: 1, // Mock provider ID
-        imageUrl: imageUrl || "",
-        trending: false
-      };
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
+      
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      // Get the provider profile from the database
+      const provider = await storage.getProviderByUserId(userData.id);
+      
+      if (!provider) {
+        return res.status(404).json({ error: "Provider profile not found" });
+      }
+      
+      // Verify service belongs to provider
+      const service = await storage.getServiceById(Number(id));
+      
+      if (!service || service.providerId !== provider.id) {
+        return res.status(403).json({ error: "Service not found or access denied" });
+      }
+      
+      // Update service in database
+      const updates: any = {};
+      if (name !== undefined) updates.name = name;
+      if (description !== undefined) updates.description = description;
+      if (price !== undefined) updates.price = price.toString();
+      if (duration !== undefined) updates.duration = Number(duration);
+      if (categoryId !== undefined) updates.categoryId = Number(categoryId);
+      if (imageUrl !== undefined) updates.imageUrl = imageUrl;
+      
+      const updatedService = await storage.updateService(Number(id), updates);
       
       res.json(updatedService);
     } catch (error) {
+      console.error("Error updating service:", error);
       res.status(500).json({ error: "Failed to update service" });
     }
   });
@@ -571,25 +603,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid provider session" });
       }
       
-      // Get services for this provider
-      let services = providerServices.get(userData.id);
+      // Get the provider profile from the database
+      const provider = await storage.getProviderByUserId(userData.id);
       
-      if (!services) {
-        return res.status(404).json({ error: "No services found" });
+      if (!provider) {
+        return res.status(404).json({ error: "Provider profile not found" });
       }
       
-      // Find and remove the service
-      const serviceIndex = services.findIndex(service => service.id === Number(id));
+      // Verify service belongs to provider before deleting
+      const service = await storage.getServiceById(Number(id));
       
-      if (serviceIndex === -1) {
-        return res.status(404).json({ error: "Service not found" });
+      if (!service || service.providerId !== provider.id) {
+        return res.status(403).json({ error: "Service not found or access denied" });
       }
       
-      // Remove the service from the array
-      services.splice(serviceIndex, 1);
-      
-      // Update the provider's services
-      providerServices.set(userData.id, services);
+      // Delete service from database
+      await storage.deleteService(Number(id));
       
       res.json({ message: "Service deleted successfully" });
     } catch (error) {
