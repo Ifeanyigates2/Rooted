@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Users } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 
 // Import the background images
 import img1 from "@assets/img 1_1751131876349.jpg";
@@ -14,7 +13,6 @@ import img4 from "@assets/img 4_1751131876350.jpg";
 export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
-  const [ethnicity, setEthnicity] = useState("");
   const [searchType, setSearchType] = useState("provider"); // "provider" or "service"
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [, setLocation] = useLocation();
@@ -36,8 +34,7 @@ export default function HeroSection() {
     const params = new URLSearchParams({
       type: searchType,
       q: searchQuery.trim(),
-      ...(searchLocation && { location: searchLocation }),
-      ...(ethnicity && { ethnicity })
+      ...(searchLocation && { location: searchLocation })
     });
     
     setLocation(`/search?${params.toString()}`);
@@ -99,7 +96,7 @@ export default function HeroSection() {
             </button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--rooted-secondary)] h-4 w-4" />
               <Input
@@ -119,22 +116,6 @@ export default function HeroSection() {
                 onChange={(e) => setSearchLocation(e.target.value)}
                 className="pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-[var(--rooted-accent)] focus:border-[var(--rooted-accent)] text-[var(--rooted-primary)]"
               />
-            </div>
-            <div className="relative">
-              <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--rooted-secondary)] h-4 w-4 z-10" />
-              <Select value={ethnicity} onValueChange={setEthnicity}>
-                <SelectTrigger className="pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-[var(--rooted-accent)] focus:border-[var(--rooted-accent)] text-[var(--rooted-primary)]">
-                  <SelectValue placeholder="Select Ethnicity" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="african-caribbean">African/Caribbean</SelectItem>
-                  <SelectItem value="asian">Asian</SelectItem>
-                  <SelectItem value="hispanic-latino">Hispanic/Latino</SelectItem>
-                  <SelectItem value="middle-eastern">Middle Eastern</SelectItem>
-                  <SelectItem value="mixed-heritage">Mixed Heritage</SelectItem>
-                  <SelectItem value="all">All Ethnicities</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
           <Button 
