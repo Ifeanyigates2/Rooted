@@ -7,6 +7,7 @@ import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { User, Briefcase, Sparkles, ArrowLeft } from "lucide-react";
 import signupImage from "@assets/login sign up_1751136337552.jpg";
 
 export default function Account() {
@@ -77,7 +78,7 @@ export default function Account() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Header */}
       <header className="px-4 sm:px-6 lg:px-8 py-6">
         <Link href="/">
@@ -88,63 +89,123 @@ export default function Account() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
           {/* Left side - Form */}
-          <div className="max-w-md">
+          <div className="max-w-lg mx-auto lg:mx-0">
             {!userType ? (
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-[var(--rooted-primary)] mb-2">Welcome to rooted</h2>
-                <p className="text-[var(--rooted-secondary)] mb-8">Choose how you'd like to join our community</p>
+              <div className="space-y-8">
+                {/* Header */}
+                <div className="text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-gradient-to-r from-[var(--rooted-primary)] to-[var(--rooted-accent)] p-3 rounded-full">
+                      <Sparkles className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                  <h2 className="text-4xl font-bold text-[var(--rooted-primary)] mb-3">Welcome to rooted.</h2>
+                  <p className="text-lg text-[var(--rooted-secondary)] max-w-md mx-auto leading-relaxed">
+                    Join our community of beauty enthusiasts and professionals
+                  </p>
+                </div>
                 
-                {/* User Type Selection */}
+                {/* User Type Selection Cards */}
                 <div className="space-y-4">
-                  <Button
+                  <div 
                     onClick={() => {
                       setUserType("customer");
                       setFormData(prev => ({ ...prev, userType: "customer" }));
                     }}
-                    className="w-full bg-[var(--rooted-primary)] hover:bg-[var(--rooted-primary)]/90 text-white py-6 rounded-xl text-lg font-semibold transition-colors"
+                    className="group p-6 border-2 border-gray-100 rounded-2xl hover:border-[var(--rooted-primary)] hover:shadow-xl hover:shadow-[var(--rooted-primary)]/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer bg-white/80 backdrop-blur-sm"
                   >
-                    Sign up as Customer
-                    <span className="block text-sm font-normal opacity-80">Find and book beauty services</span>
-                  </Button>
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-[var(--rooted-primary)]/10 group-hover:bg-[var(--rooted-primary)] p-3 rounded-xl transition-colors duration-300">
+                        <User className="h-6 w-6 text-[var(--rooted-primary)] group-hover:text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-[var(--rooted-primary)] mb-2 group-hover:text-[var(--rooted-primary)]">
+                          I'm looking for services
+                        </h3>
+                        <p className="text-[var(--rooted-secondary)] text-sm leading-relaxed">
+                          Discover and book appointments with talented beauty professionals in your area
+                        </p>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-[var(--rooted-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium">
+                          Select
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   
-                  <Button
+                  <div 
                     onClick={() => {
                       setUserType("provider");
                       setFormData(prev => ({ ...prev, userType: "provider" }));
                     }}
-                    className="w-full bg-[var(--rooted-accent)] hover:bg-[var(--rooted-accent)]/90 text-white py-6 rounded-xl text-lg font-semibold transition-colors"
+                    className="group p-6 border-2 border-gray-100 rounded-2xl hover:border-[var(--rooted-accent)] hover:shadow-xl hover:shadow-[var(--rooted-accent)]/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer bg-white/80 backdrop-blur-sm"
                   >
-                    Sign up as Service Provider
-                    <span className="block text-sm font-normal opacity-80">Offer your beauty services to clients</span>
-                  </Button>
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-[var(--rooted-accent)]/10 group-hover:bg-[var(--rooted-accent)] p-3 rounded-xl transition-colors duration-300">
+                        <Briefcase className="h-6 w-6 text-[var(--rooted-accent)] group-hover:text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-[var(--rooted-primary)] mb-2">
+                          I offer beauty services
+                        </h3>
+                        <p className="text-[var(--rooted-secondary)] text-sm leading-relaxed">
+                          Join our network of professionals and grow your beauty business
+                        </p>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-[var(--rooted-accent)] text-white px-4 py-2 rounded-lg text-sm font-medium">
+                          Select
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-[var(--rooted-secondary)]">
-                    Already have an account?{" "}
-                    <Link href="/login" className="text-[var(--rooted-primary)] font-medium hover:underline">
-                      Log in
+                {/* Sign in link */}
+                <div className="text-center pt-4 border-t border-gray-100">
+                  <p className="text-[var(--rooted-secondary)]">
+                    Already part of the rooted community?{" "}
+                    <Link href="/login" className="text-[var(--rooted-primary)] font-semibold hover:underline transition-colors">
+                      Sign in here
                     </Link>
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="mb-8">
+              <div className="space-y-6">
                 <Button
                   onClick={() => setUserType(null)}
                   variant="ghost"
-                  className="mb-4 text-[var(--rooted-secondary)] hover:text-[var(--rooted-primary)]"
+                  className="flex items-center space-x-2 text-[var(--rooted-secondary)] hover:text-[var(--rooted-primary)] transition-colors p-0"
                 >
-                  ← Back to selection
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back to selection</span>
                 </Button>
-                <h2 className="text-3xl font-bold text-[var(--rooted-primary)] mb-2">
-                  {userType === "customer" ? "Customer" : "Service Provider"} Signup
-                </h2>
-                <p className="text-[var(--rooted-secondary)]">
-                  {userType === "customer" 
-                    ? "Create your account to start booking services" 
-                    : "Join our network of professional beauty service providers"}
-                </p>
+                
+                <div className="text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className={`p-3 rounded-full ${
+                      userType === "customer" 
+                        ? "bg-[var(--rooted-primary)]/10" 
+                        : "bg-[var(--rooted-accent)]/10"
+                    }`}>
+                      {userType === "customer" ? (
+                        <User className="h-6 w-6 text-[var(--rooted-primary)]" />
+                      ) : (
+                        <Briefcase className="h-6 w-6 text-[var(--rooted-accent)]" />
+                      )}
+                    </div>
+                  </div>
+                  <h2 className="text-3xl font-bold text-[var(--rooted-primary)] mb-3">
+                    {userType === "customer" ? "Join as Customer" : "Join as Service Provider"}
+                  </h2>
+                  <p className="text-[var(--rooted-secondary)] leading-relaxed">
+                    {userType === "customer" 
+                      ? "Create your account to discover and book amazing beauty services" 
+                      : "Create your professional profile and start connecting with clients"}
+                  </p>
+                </div>
               </div>
             )}
 
