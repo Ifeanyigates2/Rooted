@@ -28,6 +28,11 @@ export default function Login() {
         description: "You have successfully logged in.",
       });
       
+      // Store session ID for authenticated requests
+      if (data.sessionId) {
+        localStorage.setItem("sessionId", data.sessionId);
+      }
+      
       // Redirect based on user type
       if (data.user.userType === "provider") {
         setLocation("/provider/dashboard");

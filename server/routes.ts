@@ -4,6 +4,10 @@ import { storage } from "./storage";
 import { mailchimpService } from "./mailchimp";
 import { resendService } from "./resend";
 
+// Simple in-memory session storage for demo purposes
+// In production, this would be handled by proper session management or JWT tokens
+const activeSessions = new Map<string, any>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
   app.get("/api/categories", async (req, res) => {
@@ -322,41 +326,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Email, password, and user type are required" });
       }
 
-      // In a real app, this would:
-      // 1. Find user by email and type in database
-      // 2. Compare hashed password
-      // 3. Create session/JWT token
-      // 4. Return user profile data
+      // In a real app, this would validate password hash
+      // For demo, we'll create a realistic user based on the email
       
-      // For demo, accept any email/password combination
-      // In production, you'd validate against stored credentials
       let userData;
       
       if (userType === "provider") {
+        // Extract first name from email (before @)
+        const emailUser = email.split('@')[0];
+        const firstName = emailUser.charAt(0).toUpperCase() + emailUser.slice(1);
+        
         userData = {
           id: "provider_" + Date.now(),
           email: email,
-          firstName: "Sarah",
-          lastName: "Johnson",
+          firstName: firstName,
+          lastName: "Provider",
           userType: "provider",
-          businessName: "Sarah's Beauty Studio",
+          businessName: `${firstName}'s Beauty Studio`,
           verified: true,
           profileCompleted: true
         };
       } else {
+        // Extract first name from email (before @)
+        const emailUser = email.split('@')[0];
+        const firstName = emailUser.charAt(0).toUpperCase() + emailUser.slice(1);
+        
         userData = {
           id: "customer_" + Date.now(),
           email: email,
-          firstName: "Demo",
+          firstName: firstName,
           lastName: "Customer",
           userType: "customer",
-          profileCompleted: Math.random() > 0.5 // Randomly determine if profile is completed
+          profileCompleted: true
         };
       }
       
+      // Store session data for this user
+      const sessionId = userData.id;
+      activeSessions.set(sessionId, userData);
+      
       res.json({ 
         message: "Login successful",
-        user: userData
+        user: userData,
+        sessionId: sessionId
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to login" });
@@ -366,36 +378,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Provider dashboard endpoints
   app.get("/api/provider/me", async (req, res) => {
     try {
-      // In a real app, this would:
-      // 1. Get user ID from session/JWT
-      // 2. Find provider by user ID
-      // 3. Return provider profile
+      // Get session ID from headers (in a real app, this would be from JWT or session cookie)
+      const sessionId = req.headers['x-session-id'] as string;
       
-      // For demo, return a mock provider profile
-      const mockProvider = {
-        id: 1,
-        name: "Sarah Johnson",
-        businessName: "Sarah's Beauty Studio",
-        email: "sarah@beautymail.com",
-        phone: "+44 20 1234 5678",
-        location: "Westminster, London",
-        country: "United Kingdom",
-        localGovernment: "Westminster",
-        bio: "Expert hair stylist and colorist with 10+ years experience",
-        specialties: ["Hair Styling", "Hair Coloring", "Bridal Hair"],
-        rating: 4.8,
-        reviewCount: 127,
-        startingPrice: 45,
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
+      
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      // Build provider profile from session data
+      const providerProfile = {
+        id: userData.id,
+        name: `${userData.firstName} ${userData.lastName}`,
+        businessName: userData.businessName,
+        email: userData.email,
+        phone: "+234 123 456 7890", // Default phone for demo
+        location: "Lagos, Nigeria", // Default location
+        country: "Nigeria",
+        localGovernment: "Lagos",
+        bio: `Professional beauty specialist with expertise in various services`,
+        specialties: ["Hair Styling", "Beauty Treatments", "Wellness Services"],
+        rating: 4.5,
+        reviewCount: 25,
+        startingPrice: 30,
         imageUrl: "https://images.unsplash.com/photo-1594736797933-d0b22c6e8daa?w=400&h=400&fit=crop",
-        verified: true,
+        verified: userData.verified || false,
         categoryId: 1,
-        instagramHandle: "@sarahbeautystudio",
+        instagramHandle: `@${userData.firstName.toLowerCase()}beauty`,
         portfolioImages: ["https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop"],
         trending: false,
-        joinDate: "2023-01-15"
+        joinDate: new Date().toISOString().split('T')[0]
       };
       
-      res.json(mockProvider);
+      res.json(providerProfile);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch provider profile" });
     }
