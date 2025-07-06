@@ -126,10 +126,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User signup with email verification
   app.post("/api/signup", async (req, res) => {
     try {
-      const { firstName, lastName, email, phone, password, countryCode } = req.body;
+      const { firstName, lastName, email, phone, password, countryCode, userType } = req.body;
       
-      if (!firstName || !lastName || !email || !phone || !password) {
-        return res.status(400).json({ error: "All fields are required" });
+      if (!firstName || !lastName || !email || !phone || !password || !userType) {
+        return res.status(400).json({ error: "All fields including user type are required" });
       }
 
       // Generate OTP (4-digit code)
@@ -316,29 +316,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User login
   app.post("/api/login", async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, userType } = req.body;
       
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
+      if (!email || !password || !userType) {
+        return res.status(400).json({ error: "Email, password, and user type are required" });
       }
 
       // In a real app, this would:
-      // 1. Find user by email in database
+      // 1. Find user by email and type in database
       // 2. Compare hashed password
       // 3. Create session/JWT token
       // 4. Return user profile data
       
       // For demo, accept any email/password combination
       // In production, you'd validate against stored credentials
-      res.json({ 
-        message: "Login successful",
-        user: {
-          id: "user_" + Date.now(),
+      let userData;
+      
+      if (userType === "provider") {
+        userData = {
+          id: "provider_" + Date.now(),
+          email: email,
+          firstName: "Sarah",
+          lastName: "Johnson",
+          userType: "provider",
+          businessName: "Sarah's Beauty Studio",
+          verified: true,
+          profileCompleted: true
+        };
+      } else {
+        userData = {
+          id: "customer_" + Date.now(),
           email: email,
           firstName: "Demo",
-          lastName: "User",
+          lastName: "Customer",
+          userType: "customer",
           profileCompleted: Math.random() > 0.5 // Randomly determine if profile is completed
-        }
+        };
+      }
+      
+      res.json({ 
+        message: "Login successful",
+        user: userData
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to login" });

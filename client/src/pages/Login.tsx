@@ -1,17 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { User, Briefcase } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
+    userType: ""
   });
 
   const loginMutation = useMutation({
@@ -25,11 +28,16 @@ export default function Login() {
         description: "You have successfully logged in.",
       });
       
-      // Check if user needs to complete profile
-      if (data.profileCompleted) {
-        setLocation("/");
+      // Redirect based on user type
+      if (data.user.userType === "provider") {
+        setLocation("/provider/dashboard");
       } else {
-        setLocation("/complete-profile");
+        // Check if customer needs to complete profile
+        if (data.user.profileCompleted) {
+          setLocation("/");
+        } else {
+          setLocation("/complete-profile");
+        }
       }
     },
     onError: (error: any) => {
@@ -48,10 +56,10 @@ export default function Login() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
+    if (!formData.email || !formData.password || !formData.userType) {
       toast({
         title: "Missing information",
-        description: "Please fill in all fields.",
+        description: "Please fill in all fields including user type.",
         variant: "destructive",
       });
       return;
@@ -72,6 +80,35 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
+          {/* User Type Selection */}
+          <div>
+            <label className="block text-sm font-medium text-[var(--rooted-primary)] mb-2">
+              I am signing in as a
+            </label>
+            <Select
+              value={formData.userType}
+              onValueChange={(value) => handleInputChange("userType", value)}
+            >
+              <SelectTrigger className="bg-gray-100 border-0 rounded-xl py-4 text-base">
+                <SelectValue placeholder="Select your account type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="customer">
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-2" />
+                    Customer - Looking for services
+                  </div>
+                </SelectItem>
+                <SelectItem value="provider">
+                  <div className="flex items-center">
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    Service Provider - Offering services
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-[var(--rooted-primary)] mb-2">
