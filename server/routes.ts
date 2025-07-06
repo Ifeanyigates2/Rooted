@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { mailchimpService } from "./mailchimp";
+import { gmailService } from "./gmail";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
@@ -135,10 +136,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
       
       // Generate verification email content
-      const htmlContent = mailchimpService.generateVerificationEmail(email, otp);
+      const htmlContent = gmailService.generateVerificationEmail(email, otp);
       
       // Send verification email
-      const emailSent = await mailchimpService.sendEmail({
+      const emailSent = await gmailService.sendEmail({
         to: email,
         subject: "Verify your rooted account",
         htmlContent,
@@ -210,10 +211,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const otp = Math.floor(1000 + Math.random() * 9000).toString();
       
       // Generate verification email content
-      const htmlContent = mailchimpService.generateVerificationEmail(email, otp);
+      const htmlContent = gmailService.generateVerificationEmail(email, otp);
       
       // Send verification email
-      const emailSent = await mailchimpService.sendEmail({
+      const emailSent = await gmailService.sendEmail({
         to: email,
         subject: "Your new rooted verification code",
         htmlContent,
@@ -395,6 +396,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Audience info error:", error);
       res.status(500).json({ message: "Failed to get audience info" });
+    }
+  });
+
+  // Test Gmail integration
+  app.get("/api/test-gmail", async (req, res) => {
+    try {
+      console.log("Testing Gmail integration...");
+      
+      // Test sending email
+      const testEmailSent = await gmailService.sendEmail({
+        to: "test@example.com",
+        subject: "Test Email from rooted",
+        htmlContent: gmailService.generateVerificationEmail("test@example.com", "1234"),
+        from: {
+          email: "noreply@rooted.com",
+          name: "rooted"
+        }
+      });
+      
+      res.json({ 
+        message: "Gmail test completed",
+        emailSent: testEmailSent
+      });
+    } catch (error) {
+      console.error("Gmail test error:", error);
+      res.status(500).json({ error: "Gmail test failed" });
     }
   });
 

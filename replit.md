@@ -94,22 +94,22 @@ This is a modern full-stack web application for connecting customers with beauty
 
 ## Recent Changes
 
-### December 30, 2025 - Mailchimp Email Integration
-- Integrated Mailchimp API for email functionality
-- Added email verification system for user signup
-- Created newsletter subscription with Mailchimp audience management
-- Added email templates for verification and welcome messages
-- Configured graceful fallback for development without API keys
-- Updated signup flow to send verification emails automatically
-- Added resend OTP functionality with Mailchimp
-- Created test endpoints for Mailchimp integration verification
+### January 6, 2025 - Gmail API Integration
+- Implemented Gmail API for sending verification emails instead of Mailchimp transactional
+- Created new Gmail service with OAuth2 authentication
+- Updated signup and resend OTP routes to use Gmail service
+- Added professional email templates with rooted branding
+- Maintained Mailchimp integration for newsletter subscription only
+- Created Gmail test endpoint for integration verification
+- Cost-effective email solution with better reliability
 
 ### Key Email Features Added:
-- **Email Verification**: OTP codes sent via Mailchimp on signup
-- **Newsletter Subscription**: Users added to Mailchimp audience
-- **Transactional Emails**: Welcome emails and verification messages
+- **Gmail API Integration**: OTP verification emails sent via Gmail
+- **OAuth2 Authentication**: Secure Gmail API authentication
+- **Professional Templates**: HTML email templates with gradient design
 - **Development Mode**: Works without API keys for testing
-- **Email Templates**: Professional HTML templates with rooted branding
+- **Cost Optimization**: Replaced paid Mailchimp transactional with free Gmail
+- **Newsletter Retention**: Kept Mailchimp for audience management
 
 ## Changelog
 - June 27, 2025. Initial setup
