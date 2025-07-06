@@ -12,6 +12,7 @@ import signupImage from "@assets/login sign up_1751136337552.jpg";
 export default function Account() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [userType, setUserType] = useState<"customer" | "provider" | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -19,7 +20,8 @@ export default function Account() {
     phone: "",
     password: "",
     confirmPassword: "",
-    countryCode: "+234"
+    countryCode: "+234",
+    userType: ""
   });
 
   const signupMutation = useMutation({
@@ -87,12 +89,67 @@ export default function Account() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
           {/* Left side - Form */}
           <div className="max-w-md">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-[var(--rooted-primary)] mb-2">Welcome</h2>
-              <p className="text-[var(--rooted-secondary)]">Lets create your new account</p>
-            </div>
+            {!userType ? (
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-[var(--rooted-primary)] mb-2">Welcome to rooted</h2>
+                <p className="text-[var(--rooted-secondary)] mb-8">Choose how you'd like to join our community</p>
+                
+                {/* User Type Selection */}
+                <div className="space-y-4">
+                  <Button
+                    onClick={() => {
+                      setUserType("customer");
+                      setFormData(prev => ({ ...prev, userType: "customer" }));
+                    }}
+                    className="w-full bg-[var(--rooted-primary)] hover:bg-[var(--rooted-primary)]/90 text-white py-6 rounded-xl text-lg font-semibold transition-colors"
+                  >
+                    Sign up as Customer
+                    <span className="block text-sm font-normal opacity-80">Find and book beauty services</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => {
+                      setUserType("provider");
+                      setFormData(prev => ({ ...prev, userType: "provider" }));
+                    }}
+                    className="w-full bg-[var(--rooted-accent)] hover:bg-[var(--rooted-accent)]/90 text-white py-6 rounded-xl text-lg font-semibold transition-colors"
+                  >
+                    Sign up as Service Provider
+                    <span className="block text-sm font-normal opacity-80">Offer your beauty services to clients</span>
+                  </Button>
+                </div>
+                
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-[var(--rooted-secondary)]">
+                    Already have an account?{" "}
+                    <Link href="/login" className="text-[var(--rooted-primary)] font-medium hover:underline">
+                      Log in
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mb-8">
+                <Button
+                  onClick={() => setUserType(null)}
+                  variant="ghost"
+                  className="mb-4 text-[var(--rooted-secondary)] hover:text-[var(--rooted-primary)]"
+                >
+                  ← Back to selection
+                </Button>
+                <h2 className="text-3xl font-bold text-[var(--rooted-primary)] mb-2">
+                  {userType === "customer" ? "Customer" : "Service Provider"} Signup
+                </h2>
+                <p className="text-[var(--rooted-secondary)]">
+                  {userType === "customer" 
+                    ? "Create your account to start booking services" 
+                    : "Join our network of professional beauty service providers"}
+                </p>
+              </div>
+            )}
 
-            <form onSubmit={handleSignUp} className="space-y-4">
+            {userType && (
+              <form onSubmit={handleSignUp} className="space-y-4">
               {/* Name fields */}
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -211,6 +268,7 @@ export default function Account() {
                 <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
               </div>
             </form>
+            )}
           </div>
 
           {/* Right side - Image */}
