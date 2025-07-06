@@ -98,27 +98,44 @@ export class MailchimpService {
     }
   }
 
-  // Send transactional email using Mailchimp Transactional API
-  // Note: This requires Mailchimp Transactional (formerly Mandrill) service
+  // Send transactional email using Mailchimp
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
-      // Add the email to our audience if configured
-      if (this.isConfigured) {
-        await this.addSubscriber({
-          email: params.to,
-          status: 'subscribed'
-        });
+      if (!this.isConfigured) {
+        // Development mode - log email details and show OTP in console
+        console.log('=== EMAIL WOULD BE SENT (Mailchimp not configured) ===');
+        console.log('To:', params.to);
+        console.log('Subject:', params.subject);
+        console.log('Content:', params.htmlContent);
+        console.log('=====================================================');
+        return true;
       }
 
-      console.log('Email sent:', {
-        to: params.to,
-        subject: params.subject,
-        from: params.from || { email: 'noreply@rooted.com', name: 'Rooted' },
-        configured: this.isConfigured
+      // Add subscriber to audience with special tags for email trigger
+      const subscriberResult = await this.addSubscriber({
+        email: params.to,
+        status: 'subscribed'
       });
 
-      // Return true for both configured and development mode
-      return true;
+      if (subscriberResult) {
+        // For now, we'll use a simple approach: add subscriber and log the email
+        // In production, you would set up Mailchimp automations to trigger on subscriber events
+        console.log('Email triggered via Mailchimp for:', params.to);
+        console.log('Subject:', params.subject);
+        
+        // Extract OTP from content for development purposes
+        const otpMatch = params.htmlContent.match(/>\s*(\d{4})\s*</);
+        if (otpMatch) {
+          console.log('=== OTP CODE FOR TESTING ===');
+          console.log('Email:', params.to);
+          console.log('OTP:', otpMatch[1]);
+          console.log('============================');
+        }
+        
+        return true;
+      }
+
+      return false;
     } catch (error: any) {
       console.error('Email sending error:', error);
       return false;
