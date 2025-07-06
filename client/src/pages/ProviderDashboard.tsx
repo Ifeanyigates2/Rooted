@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,11 +16,40 @@ export default function ProviderDashboard() {
   const { toast } = useToast();
   const [isAddingService, setIsAddingService] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [profileForm, setProfileForm] = useState({
+    firstName: "",
+    lastName: "",
+    businessName: "",
+    email: "",
+    phone: "",
+    bio: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
 
   // Get provider data (assuming the logged-in user is a provider)
-  const { data: provider, isLoading: isLoadingProvider } = useQuery<Provider>({
+  const { data: provider, isLoading: isLoadingProvider } = useQuery<any>({
     queryKey: ["/api/provider/me"],
   });
+
+  // Populate profile form when provider data is loaded
+  React.useEffect(() => {
+    if (provider) {
+      const [firstName, lastName] = provider.name?.split(' ') || ['', ''];
+      setProfileForm({
+        firstName: firstName || "",
+        lastName: lastName || "",
+        businessName: provider.businessName || "",
+        email: provider.email || "",
+        phone: provider.phone || "",
+        bio: provider.bio || "",
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+    }
+  }, [provider]);
 
   // Get provider's services
   const { data: services = [], isLoading: isLoadingServices } = useQuery<Service[]>({
@@ -128,6 +157,62 @@ export default function ProviderDashboard() {
     },
   });
 
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: Omit<typeof profileForm, 'currentPassword' | 'newPassword' | 'confirmPassword'>) => {
+      const response = await apiRequest("PATCH", "/api/provider/profile", profileData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/provider/me"] });
+      // Clear password fields
+      setProfileForm(prev => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      }));
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update password mutation
+  const updatePasswordMutation = useMutation({
+    mutationFn: async (passwordData: { currentPassword: string; newPassword: string }) => {
+      const response = await apiRequest("PATCH", "/api/provider/password", passwordData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Updated",
+        description: "Your password has been updated successfully",
+      });
+      setProfileForm(prev => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      }));
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Password Update Failed",
+        description: error.message || "Failed to update password",
+        variant: "destructive",
+      });
+    },
+  });
+
   const resetServiceForm = () => {
     setServiceForm({
       name: "",
@@ -173,6 +258,55 @@ export default function ProviderDashboard() {
     if (confirm("Are you sure you want to delete this service?")) {
       deleteServiceMutation.mutate(serviceId);
     }
+  };
+
+  const handleProfileInputChange = (field: string, value: string) => {
+    setProfileForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleProfileSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const { currentPassword, newPassword, confirmPassword, ...profileData } = profileForm;
+    
+    // Update profile information
+    updateProfileMutation.mutate(profileData);
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!profileForm.currentPassword || !profileForm.newPassword) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both current and new password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (profileForm.newPassword !== profileForm.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "New password and confirmation do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (profileForm.newPassword.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updatePasswordMutation.mutate({
+      currentPassword: profileForm.currentPassword,
+      newPassword: profileForm.newPassword
+    });
   };
 
   if (isLoadingProvider) {
@@ -505,17 +639,136 @@ export default function ProviderDashboard() {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
+            {/* Personal Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Profile Settings</CardTitle>
-                <CardDescription>Manage your business profile and preferences</CardDescription>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>Update your personal and business details</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <Eye className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Profile management coming soon</h3>
-                  <p className="text-gray-600">You'll be able to update your business information, photos, and settings here</p>
-                </div>
+                <form onSubmit={handleProfileSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                      <Input
+                        value={profileForm.firstName}
+                        onChange={(e) => handleProfileInputChange("firstName", e.target.value)}
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                      <Input
+                        value={profileForm.lastName}
+                        onChange={(e) => handleProfileInputChange("lastName", e.target.value)}
+                        placeholder="Enter your last name"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+                    <Input
+                      value={profileForm.businessName}
+                      onChange={(e) => handleProfileInputChange("businessName", e.target.value)}
+                      placeholder="Enter your business name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <Input
+                      type="email"
+                      value={profileForm.email}
+                      onChange={(e) => handleProfileInputChange("email", e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <Input
+                      value={profileForm.phone}
+                      onChange={(e) => handleProfileInputChange("phone", e.target.value)}
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                    <Textarea
+                      value={profileForm.bio}
+                      onChange={(e) => handleProfileInputChange("bio", e.target.value)}
+                      placeholder="Tell customers about yourself and your expertise"
+                      rows={4}
+                    />
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    disabled={updateProfileMutation.isPending}
+                    className="w-full md:w-auto"
+                  >
+                    {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Password Change */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Change Password</CardTitle>
+                <CardDescription>Update your account password for security</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                    <Input
+                      type="password"
+                      value={profileForm.currentPassword}
+                      onChange={(e) => handleProfileInputChange("currentPassword", e.target.value)}
+                      placeholder="Enter your current password"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                    <Input
+                      type="password"
+                      value={profileForm.newPassword}
+                      onChange={(e) => handleProfileInputChange("newPassword", e.target.value)}
+                      placeholder="Enter your new password"
+                      required
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Password must be at least 8 characters long</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                    <Input
+                      type="password"
+                      value={profileForm.confirmPassword}
+                      onChange={(e) => handleProfileInputChange("confirmPassword", e.target.value)}
+                      placeholder="Confirm your new password"
+                      required
+                    />
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    disabled={updatePasswordMutation.isPending}
+                    variant="outline"
+                    className="w-full md:w-auto"
+                  >
+                    {updatePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>

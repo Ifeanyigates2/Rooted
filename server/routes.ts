@@ -597,6 +597,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update provider profile
+  app.patch("/api/provider/profile", async (req, res) => {
+    try {
+      // Get session ID from headers
+      const sessionId = req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
+      
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      const { firstName, lastName, businessName, email, phone, bio } = req.body;
+      
+      // Update session data
+      const updatedUserData = {
+        ...userData,
+        firstName,
+        lastName,
+        businessName,
+        email,
+        phone,
+        bio
+      };
+      
+      activeSessions.set(sessionId, updatedUserData);
+      
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  });
+
+  // Update provider password
+  app.patch("/api/provider/password", async (req, res) => {
+    try {
+      // Get session ID from headers
+      const sessionId = req.headers['x-session-id'] as string;
+      
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
+      
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      const { currentPassword, newPassword } = req.body;
+      
+      // In a real application, you would verify the current password
+      // For this demo, we'll just update the password
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Current password and new password are required" });
+      }
+      
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "New password must be at least 8 characters long" });
+      }
+      
+      // Update password in session (in a real app, you'd hash and store in database)
+      const updatedUserData = {
+        ...userData,
+        password: newPassword // In production, this would be hashed
+      };
+      
+      activeSessions.set(sessionId, updatedUserData);
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update password" });
+    }
+  });
+
   // Test Mailchimp endpoint
   app.post("/api/test-mailchimp", async (req, res) => {
     try {
