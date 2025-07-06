@@ -66,8 +66,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Search
-  app.get("/api/search", async (req, res) => {
+  // Search Providers
+  app.get("/api/search/providers", async (req, res) => {
     try {
       const { q: query, location, category } = req.query;
       const providers = await storage.searchProviders(
@@ -78,6 +78,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(providers);
     } catch (error) {
       res.status(500).json({ error: "Failed to search providers" });
+    }
+  });
+
+  // Search Services
+  app.get("/api/search/services", async (req, res) => {
+    try {
+      const { q: query, location, category } = req.query;
+      const services = await storage.searchServices(
+        query as string,
+        location as string,
+        category ? Number(category) : undefined
+      );
+      res.json(services);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to search services" });
     }
   });
 

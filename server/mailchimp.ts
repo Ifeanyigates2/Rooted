@@ -1,15 +1,23 @@
 import mailchimp from '@mailchimp/mailchimp_marketing';
+import mailchimpTransactional from '@mailchimp/mailchimp_transactional';
 import crypto from 'crypto';
 
 // Check if Mailchimp is configured
 const isMailchimpConfigured = Boolean(process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_AUDIENCE_ID);
+const isTransactionalConfigured = Boolean(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY);
 
 if (isMailchimpConfigured) {
-  // Configure Mailchimp
+  // Configure Mailchimp Marketing
   mailchimp.setConfig({
     apiKey: process.env.MAILCHIMP_API_KEY!,
     server: process.env.MAILCHIMP_API_KEY!.split('-')[1], // Extract server prefix from API key
   });
+}
+
+// Configure Mailchimp Transactional (for sending emails)
+let mandrillClient: any = null;
+if (isTransactionalConfigured) {
+  mandrillClient = mailchimpTransactional(process.env.MAILCHIMP_TRANSACTIONAL_API_KEY!);
 }
 
 interface EmailParams {
@@ -85,33 +93,63 @@ export class MailchimpService {
   // Send transactional email using Mailchimp
   async sendEmail(params: EmailParams): Promise<boolean> {
     try {
-      if (!this.isConfigured) {
-        // Development mode - log email details and show OTP in console
-        console.log('=== EMAIL WOULD BE SENT (Mailchimp not configured) ===');
-        console.log('To:', params.to);
-        console.log('Subject:', params.subject);
-        console.log('Content:', params.htmlContent);
-        console.log('=====================================================');
-        return true;
+      // Add subscriber to marketing audience if configured
+      if (this.isConfigured) {
+        try {
+          await this.addSubscriber({
+            email: params.to,
+            status: 'subscribed'
+          });
+        } catch (error) {
+          console.log('Subscriber already exists or error adding:', params.to);
+        }
       }
 
-      // Try to add subscriber to audience - ignore if already exists
-      try {
-        await this.addSubscriber({
-          email: params.to,
-          status: 'subscribed'
-        });
-      } catch (error) {
-        // If subscriber already exists, that's fine - continue with email processing
-        console.log('Subscriber already exists or error adding:', params.to);
+      // Send actual email using Mailchimp Transactional if configured
+      if (isTransactionalConfigured && mandrillClient) {
+        try {
+          const message = {
+            from_email: params.from?.email || 'noreply@rooted.com',
+            from_name: params.from?.name || 'rooted',
+            to: [{
+              email: params.to,
+              type: 'to'
+            }],
+            subject: params.subject,
+            html: params.htmlContent,
+            important: true, // Mark as priority for better delivery
+            track_opens: true,
+            track_clicks: true
+          };
+
+          const response = await mandrillClient.messages.send({
+            message: message
+          });
+
+          console.log('Email sent successfully via Mailchimp Transactional:', response);
+          
+          // Extract OTP for development logging
+          const otpMatch = params.htmlContent.match(/>\s*(\d{4})\s*</);
+          if (otpMatch) {
+            console.log('=== OTP CODE SENT ===');
+            console.log('Email:', params.to);
+            console.log('OTP:', otpMatch[1]);
+            console.log('Status:', response[0]?.status || 'unknown');
+            console.log('====================');
+          }
+          
+          return response && response[0]?.status === 'sent';
+        } catch (error: any) {
+          console.error('Mailchimp Transactional error:', error);
+          // Fall through to development mode
+        }
       }
 
-      // For now, we'll use a simple approach: log the email details
-      // In production, you would set up Mailchimp automations to trigger on subscriber events
-      console.log('Email triggered via Mailchimp for:', params.to);
+      // Development mode - log email details
+      console.log('=== EMAIL WOULD BE SENT (Transactional not configured) ===');
+      console.log('To:', params.to);
       console.log('Subject:', params.subject);
       
-      // Extract OTP from content for development purposes
       const otpMatch = params.htmlContent.match(/>\s*(\d{4})\s*</);
       if (otpMatch) {
         console.log('=== OTP CODE FOR TESTING ===');
@@ -119,6 +157,7 @@ export class MailchimpService {
         console.log('OTP:', otpMatch[1]);
         console.log('============================');
       }
+      console.log('========================================================');
       
       return true;
     } catch (error: any) {

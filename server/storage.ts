@@ -22,6 +22,7 @@ export interface IStorage {
 
   // Search
   searchProviders(query: string, location?: string, categoryId?: number): Promise<Provider[]>;
+  searchServices(query: string, location?: string, categoryId?: number): Promise<Service[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -266,6 +267,37 @@ export class MemStorage implements IStorage {
 
     if (categoryId) {
       results = results.filter(p => p.categoryId === categoryId);
+    }
+
+    return results;
+  }
+
+  async searchServices(query: string, location?: string, categoryId?: number): Promise<Service[]> {
+    let results = Array.from(this.services.values());
+
+    if (query) {
+      const lowercaseQuery = query.toLowerCase();
+      results = results.filter(service => 
+        service.name.toLowerCase().includes(lowercaseQuery) ||
+        (service.description && service.description.toLowerCase().includes(lowercaseQuery))
+      );
+    }
+
+    if (location) {
+      const lowercaseLocation = location.toLowerCase();
+      // Filter services by provider location
+      results = results.filter(service => {
+        const provider = this.providers.get(service.providerId);
+        return provider && provider.location.toLowerCase().includes(lowercaseLocation);
+      });
+    }
+
+    if (categoryId) {
+      // Filter services by provider category
+      results = results.filter(service => {
+        const provider = this.providers.get(service.providerId);
+        return provider && provider.categoryId === categoryId;
+      });
     }
 
     return results;

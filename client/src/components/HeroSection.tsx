@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,9 +13,11 @@ import img4 from "@assets/img 4_1751131876350.jpg";
 
 export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [location, setLocation] = useState("");
+  const [searchLocation, setSearchLocation] = useState("");
   const [ethnicity, setEthnicity] = useState("");
+  const [searchType, setSearchType] = useState("provider"); // "provider" or "service"
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [, setLocation] = useLocation();
 
   const backgroundImages = [img1, img2, img3, img4];
 
@@ -28,8 +31,16 @@ export default function HeroSection() {
   }, [backgroundImages.length]);
 
   const handleSearch = () => {
-    console.log("Search initiated:", { searchQuery, location, ethnicity });
-    // TODO: Implement search functionality
+    if (!searchQuery.trim()) return;
+    
+    const params = new URLSearchParams({
+      type: searchType,
+      q: searchQuery.trim(),
+      ...(searchLocation && { location: searchLocation }),
+      ...(ethnicity && { ethnicity })
+    });
+    
+    setLocation(`/search?${params.toString()}`);
   };
 
   return (
@@ -64,12 +75,36 @@ export default function HeroSection() {
         </h1>
         
         <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-2xl p-6 mt-8 max-w-3xl mx-auto">
+          {/* Search Type Toggle */}
+          <div className="flex mb-6 bg-gray-100 rounded-xl p-1">
+            <button
+              onClick={() => setSearchType("provider")}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                searchType === "provider"
+                  ? "bg-[var(--rooted-primary)] text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              Search Providers
+            </button>
+            <button
+              onClick={() => setSearchType("service")}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                searchType === "service"
+                  ? "bg-[var(--rooted-primary)] text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+            >
+              Search Services
+            </button>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[var(--rooted-secondary)] h-4 w-4" />
               <Input
                 type="text"
-                placeholder="Search Service provider"
+                placeholder={searchType === "provider" ? "Search Service provider" : "Search for services (e.g., haircut, manicure)"}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-[var(--rooted-accent)] focus:border-[var(--rooted-accent)] text-[var(--rooted-primary)]"
@@ -80,8 +115,8 @@ export default function HeroSection() {
               <Input
                 type="text"
                 placeholder="Enter your location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
                 className="pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-[var(--rooted-accent)] focus:border-[var(--rooted-accent)] text-[var(--rooted-primary)]"
               />
             </div>
