@@ -109,11 +109,7 @@ export default function ProviderDashboard() {
   // Delete service mutation
   const deleteServiceMutation = useMutation({
     mutationFn: async (serviceId: number) => {
-      const response = await fetch(`/api/services/${serviceId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to delete service");
+      const response = await apiRequest("DELETE", `/api/services/${serviceId}`);
       return response.json();
     },
     onSuccess: () => {

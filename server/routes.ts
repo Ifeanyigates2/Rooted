@@ -8,6 +8,9 @@ import { resendService } from "./resend";
 // In production, this would be handled by proper session management or JWT tokens
 const activeSessions = new Map<string, any>();
 
+// Simple in-memory service storage per provider
+const providerServices = new Map<string, any[]>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Categories
   app.get("/api/categories", async (req, res) => {
@@ -424,49 +427,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/provider/services", async (req, res) => {
     try {
-      // In a real app, this would:
-      // 1. Get user ID from session/JWT
-      // 2. Find provider by user ID
-      // 3. Get services for that provider
+      // Get session ID from headers
+      const sessionId = req.headers['x-session-id'] as string;
       
-      // For demo, return mock services for the provider
-      const mockServices = [
-        {
-          id: 1,
-          name: "Classic Haircut & Blow Dry",
-          description: "Professional haircut with styling and blow dry finish",
-          price: 45,
-          duration: 60,
-          categoryId: 1,
-          providerId: 1,
-          imageUrl: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop",
-          trending: false
-        },
-        {
-          id: 2,
-          name: "Full Hair Color Service",
-          description: "Complete hair coloring service with consultation and aftercare",
-          price: 120,
-          duration: 180,
-          categoryId: 1,
-          providerId: 1,
-          imageUrl: "https://images.unsplash.com/photo-1559599101-f09722fb4948?w=400&h=400&fit=crop",
-          trending: true
-        },
-        {
-          id: 3,
-          name: "Bridal Hair Styling",
-          description: "Elegant bridal hair styling for your special day",
-          price: 85,
-          duration: 120,
-          categoryId: 1,
-          providerId: 1,
-          imageUrl: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=400&h=400&fit=crop",
-          trending: false
-        }
-      ];
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
       
-      res.json(mockServices);
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      // Get or initialize services for this provider
+      let services = providerServices.get(userData.id);
+      
+      if (!services) {
+        // Initialize with default services for new providers
+        services = [
+          {
+            id: 1,
+            name: "Classic Haircut & Blow Dry",
+            description: "Professional haircut with styling and blow dry finish",
+            price: 45,
+            duration: 60,
+            categoryId: 1,
+            providerId: userData.id,
+            imageUrl: "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=400&fit=crop",
+            trending: false
+          },
+          {
+            id: 2,
+            name: "Full Hair Color Service",
+            description: "Complete hair coloring service with consultation and aftercare",
+            price: 120,
+            duration: 180,
+            categoryId: 1,
+            providerId: userData.id,
+            imageUrl: "https://images.unsplash.com/photo-1559599101-f09722fb4948?w=400&h=400&fit=crop",
+            trending: true
+          },
+          {
+            id: 3,
+            name: "Bridal Hair Styling",
+            description: "Elegant bridal hair styling for your special day",
+            price: 85,
+            duration: 120,
+            categoryId: 1,
+            providerId: userData.id,
+            imageUrl: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=400&h=400&fit=crop",
+            trending: false
+          }
+        ];
+        providerServices.set(userData.id, services);
+      }
+      
+      res.json(services);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch provider services" });
     }
@@ -539,13 +557,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      // In a real app, this would:
-      // 1. Get user ID from session/JWT
-      // 2. Find provider by user ID
-      // 3. Verify service belongs to provider
-      // 4. Delete service from database
+      // Get session ID from headers
+      const sessionId = req.headers['x-session-id'] as string;
       
-      // For demo, just return success
+      if (!sessionId) {
+        return res.status(401).json({ error: "No session found" });
+      }
+      
+      // Get user data from active session
+      const userData = activeSessions.get(sessionId);
+      
+      if (!userData || userData.userType !== "provider") {
+        return res.status(401).json({ error: "Invalid provider session" });
+      }
+      
+      // Get services for this provider
+      let services = providerServices.get(userData.id);
+      
+      if (!services) {
+        return res.status(404).json({ error: "No services found" });
+      }
+      
+      // Find and remove the service
+      const serviceIndex = services.findIndex(service => service.id === Number(id));
+      
+      if (serviceIndex === -1) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+      
+      // Remove the service from the array
+      services.splice(serviceIndex, 1);
+      
+      // Update the provider's services
+      providerServices.set(userData.id, services);
+      
       res.json({ message: "Service deleted successfully" });
     } catch (error) {
       res.status(500).json({ error: "Failed to delete service" });
