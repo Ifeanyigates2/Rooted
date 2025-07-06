@@ -28,30 +28,34 @@ export default function SearchResults() {
   }, []);
 
   // Search providers
-  const { data: providers, isLoading: isLoadingProviders } = useQuery({
+  const { data: providers, isLoading: isLoadingProviders } = useQuery<Provider[]>({
     queryKey: ["/api/search/providers", query, searchLocation, category],
     enabled: searchType === "provider" && Boolean(query),
   });
 
   // Search services
-  const { data: services, isLoading: isLoadingServices } = useQuery({
+  const { data: services, isLoading: isLoadingServices } = useQuery<Service[]>({
     queryKey: ["/api/search/services", query, searchLocation, category],
     enabled: searchType === "service" && Boolean(query),
   });
 
   // Get providers for services (to show provider info with each service)
-  const { data: allProviders } = useQuery({
+  const { data: allProviders } = useQuery<Provider[]>({
     queryKey: ["/api/providers"],
     enabled: searchType === "service",
   });
 
-  const servicesWithProviders: ServiceWithProvider[] = services?.map((service: Service) => ({
-    ...service,
-    provider: allProviders?.find((p: Provider) => p.id === service.providerId)
-  })) || [];
+  const servicesWithProviders: ServiceWithProvider[] = Array.isArray(services) 
+    ? services.map((service: Service) => ({
+        ...service,
+        provider: Array.isArray(allProviders) 
+          ? allProviders.find((p: Provider) => p.id === service.providerId)
+          : undefined
+      }))
+    : [];
 
   const isLoading = searchType === "provider" ? isLoadingProviders : isLoadingServices;
-  const results = searchType === "provider" ? providers : servicesWithProviders;
+  const results = searchType === "provider" ? (Array.isArray(providers) ? providers : []) : servicesWithProviders;
   const resultCount = results?.length || 0;
 
   const handleBackClick = () => {

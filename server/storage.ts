@@ -61,6 +61,8 @@ export class MemStorage implements IStorage {
         name: "KDHAIR",
         businessName: "KD Hair Studio",
         location: "Leeds, United Kingdom",
+        country: "United Kingdom",
+        localGovernment: "Leeds",
         imageUrl: "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300",
         rating: "4.9",
         reviewCount: 13,
@@ -73,6 +75,8 @@ export class MemStorage implements IStorage {
         name: "Crowned Beauty",
         businessName: "Crowned Beauty Salon",
         location: "Chelmsford, UK",
+        country: "United Kingdom",
+        localGovernment: "Chelmsford",
         imageUrl: null,
         rating: "4.9",
         reviewCount: 13,
@@ -85,6 +89,8 @@ export class MemStorage implements IStorage {
         name: "The Tail Bandit",
         businessName: "The Tail Bandit Studio",
         location: "Newcastle, UK",
+        country: "United Kingdom",
+        localGovernment: "Newcastle",
         imageUrl: null,
         rating: "4.9",
         reviewCount: 13,
@@ -97,6 +103,8 @@ export class MemStorage implements IStorage {
         name: "ITSMBEAUTY",
         businessName: "Its M Beauty",
         location: "Manchester, UK",
+        country: "United Kingdom",
+        localGovernment: "Manchester",
         imageUrl: null,
         rating: "4.9",
         reviewCount: 13,
@@ -109,6 +117,8 @@ export class MemStorage implements IStorage {
         name: "FLESH TATTOO",
         businessName: "Flesh Tattoo Studio",
         location: "London, UK",
+        country: "United Kingdom",
+        localGovernment: "Camden",
         imageUrl: null,
         rating: "4.9",
         reviewCount: 13,
@@ -121,6 +131,8 @@ export class MemStorage implements IStorage {
         name: "CBSALON",
         businessName: "CB Hair Salon",
         location: "Birmingham, UK",
+        country: "United Kingdom",
+        localGovernment: "Birmingham",
         imageUrl: null,
         rating: "4.9",
         reviewCount: 13,
@@ -132,7 +144,15 @@ export class MemStorage implements IStorage {
     ];
 
     providerData.forEach(prov => {
-      const provider: Provider = { ...prov, id: this.currentProviderId++ };
+      const provider: Provider = { 
+        ...prov, 
+        id: this.currentProviderId++,
+        imageUrl: prov.imageUrl || null,
+        businessName: prov.businessName || null,
+        reviewCount: prov.reviewCount || 0,
+        specialties: prov.specialties || null,
+        verified: prov.verified || null
+      };
       this.providers.set(provider.id, provider);
     });
 
@@ -181,7 +201,14 @@ export class MemStorage implements IStorage {
     ];
 
     serviceData.forEach(serv => {
-      const service: Service = { ...serv, id: this.currentServiceId++ };
+      const service: Service = { 
+        ...serv, 
+        id: this.currentServiceId++,
+        imageUrl: serv.imageUrl || null,
+        description: serv.description || null,
+        duration: serv.duration || null,
+        trending: serv.trending || null
+      };
       this.services.set(service.id, service);
     });
   }
@@ -219,7 +246,15 @@ export class MemStorage implements IStorage {
   }
 
   async createProvider(provider: InsertProvider): Promise<Provider> {
-    const newProvider: Provider = { ...provider, id: this.currentProviderId++ };
+    const newProvider: Provider = { 
+      ...provider, 
+      id: this.currentProviderId++,
+      imageUrl: provider.imageUrl || null,
+      businessName: provider.businessName || null,
+      reviewCount: provider.reviewCount || 0,
+      specialties: provider.specialties || null,
+      verified: provider.verified || null
+    };
     this.providers.set(newProvider.id, newProvider);
     return newProvider;
   }
@@ -243,7 +278,14 @@ export class MemStorage implements IStorage {
   }
 
   async createService(service: InsertService): Promise<Service> {
-    const newService: Service = { ...service, id: this.currentServiceId++ };
+    const newService: Service = { 
+      ...service, 
+      id: this.currentServiceId++,
+      imageUrl: service.imageUrl || null,
+      description: service.description || null,
+      duration: service.duration || null,
+      trending: service.trending || null
+    };
     this.services.set(newService.id, newService);
     return newService;
   }

@@ -14,6 +14,8 @@ export const providers = pgTable("providers", {
   name: text("name").notNull(),
   businessName: text("business_name"),
   location: text("location").notNull(),
+  country: text("country").notNull(),
+  localGovernment: text("local_government").notNull(),
   imageUrl: text("image_url"),
   rating: decimal("rating", { precision: 2, scale: 1 }).notNull(),
   reviewCount: integer("review_count").notNull().default(0),
