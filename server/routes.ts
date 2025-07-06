@@ -250,6 +250,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for sending verification email
+  app.post('/api/test-email', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      // Generate a test OTP
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      
+      console.log('=== SENDING TEST EMAIL ===');
+      console.log('To:', email);
+      console.log('OTP:', otp);
+      console.log('========================');
+
+      // Send verification email
+      const emailSent = await mailchimpService.sendEmail({
+        to: email,
+        subject: 'Test OTP - rooted account verification',
+        htmlContent: mailchimpService.generateVerificationEmail(email, otp)
+      });
+
+      if (emailSent) {
+        res.json({
+          success: true,
+          message: 'Test email sent successfully',
+          email: email,
+          otp: otp // Include OTP for development testing
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: 'Failed to send test email'
+        });
+      }
+    } catch (error: any) {
+      console.error('Test email error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+        message: 'Test email failed'
+      });
+    }
+  });
+
   // User login
   app.post("/api/login", async (req, res) => {
     try {
