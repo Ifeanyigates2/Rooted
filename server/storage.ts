@@ -395,7 +395,12 @@ export class DatabaseStorage implements IStorage {
 
   // Categories
   async getCategories(): Promise<Category[]> {
-    return await db.select().from(categories);
+    try {
+      return await db.select().from(categories);
+    } catch (error) {
+      console.error("Database error in getCategories:", error);
+      throw error;
+    }
   }
 
   async getCategoryById(id: number): Promise<Category | undefined> {
@@ -410,7 +415,12 @@ export class DatabaseStorage implements IStorage {
 
   // Providers
   async getProviders(): Promise<Provider[]> {
-    return await db.select().from(providers);
+    try {
+      return await db.select().from(providers);
+    } catch (error) {
+      console.error("Database error in getProviders:", error);
+      throw error;
+    }
   }
 
   async getProvidersByCategory(categoryId: number): Promise<Provider[]> {
@@ -438,7 +448,12 @@ export class DatabaseStorage implements IStorage {
 
   // Services
   async getServices(): Promise<Service[]> {
-    return await db.select().from(services);
+    try {
+      return await db.select().from(services);
+    } catch (error) {
+      console.error("Database error in getServices:", error);
+      throw error;
+    }
   }
 
   async getServicesByProvider(providerId: number): Promise<Service[]> {
