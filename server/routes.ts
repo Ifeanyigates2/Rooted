@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subject: "Verify your rooted account",
           htmlContent,
           from: {
-            email: "onboarding@resend.dev",
+            email: "ifeanyiapple1@gmail.com", // Use the verified email for development
             name: "rooted"
           }
         });
