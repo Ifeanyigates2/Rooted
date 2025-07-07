@@ -41,10 +41,11 @@ export default function Account() {
       localStorage.setItem("verificationEmail", formData.email);
       setLocation("/verify-email");
     },
-    onError: () => {
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Please try again later.";
       toast({
         title: "Signup failed",
-        description: "Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
