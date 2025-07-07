@@ -215,7 +215,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           otp: process.env.NODE_ENV === 'development' ? otp : undefined
         });
       } else {
-        res.status(500).json({ error: "Failed to send verification email" });
+        // Account was created successfully even if email failed
+        console.log("Email delivery failed, but account was created successfully");
+        res.json({
+          message: "Account created successfully. Email verification temporarily unavailable - you can log in directly.",
+          userId: newUser.id,
+          userType: userType,
+          otp: process.env.NODE_ENV === 'development' ? otp : undefined,
+          emailNote: "Email service restricted to verified domains"
+        });
       }
     } catch (error) {
       console.error("Detailed signup error:", error);
