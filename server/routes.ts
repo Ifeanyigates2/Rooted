@@ -237,6 +237,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Development helper to get OTP for testing (when email delivery fails)
+  app.get("/api/dev/get-otp/:email", async (req, res) => {
+    if (process.env.NODE_ENV !== 'development') {
+      return res.status(404).json({ error: "Not found" });
+    }
+    
+    const { email } = req.params;
+    // In a real app, you'd store OTPs in database/cache
+    // For now, we'll generate a new one for testing
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    res.json({ email, otp, note: "Development OTP for testing" });
+  });
+
   // Email verification
   app.post("/api/verify-email", async (req, res) => {
     try {
