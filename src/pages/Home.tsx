@@ -6,6 +6,7 @@ export default function Home() {
   const [searchService, setSearchService] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [selectedEthnicity, setSelectedEthnicity] = useState('');
+  const [filteredProviders, setFilteredProviders] = useState(providers);
 
   const categories = [
     { name: 'Hair', image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=100&h=100' },
@@ -22,7 +23,7 @@ export default function Home() {
     {
       id: 1,
       name: 'Crowned Beauty',
-      location: 'Chelmsford, UK',
+      location: 'Bexley, UK',
       rating: 4.9,
       reviews: 13,
       startingPrice: 15,
@@ -33,7 +34,7 @@ export default function Home() {
     {
       id: 2,
       name: 'ITSMBEAUTY',
-      location: 'Manchester, UK',
+      location: 'Bexley, UK',
       rating: 4.9,
       reviews: 13,
       startingPrice: 15,
@@ -44,7 +45,7 @@ export default function Home() {
     {
       id: 3,
       name: 'KDHAIR',
-      location: 'Leeds, United Kingdom',
+      location: 'Manchester, UK',
       rating: 4.9,
       reviews: 13,
       startingPrice: 15,
@@ -55,7 +56,7 @@ export default function Home() {
     {
       id: 4,
       name: 'The Tail Bandit',
-      location: 'Newcastle, UK',
+      location: 'Leeds, UK',
       rating: 4.9,
       reviews: 13,
       startingPrice: 15,
@@ -65,6 +66,23 @@ export default function Home() {
     }
   ];
 
+  // Filter providers based on search location
+  const filterProviders = () => {
+    if (!searchLocation.trim()) {
+      setFilteredProviders(providers);
+      return;
+    }
+
+    const filtered = providers.filter(provider => 
+      provider.location.toLowerCase().includes(searchLocation.toLowerCase())
+    );
+    setFilteredProviders(filtered);
+  };
+
+  // Update filtered providers when search location changes
+  React.useEffect(() => {
+    filterProviders();
+  }, [searchLocation]);
   const trendingServices = [
     {
       id: 1,
@@ -109,7 +127,12 @@ export default function Home() {
   ];
 
   const handleSearch = () => {
-    alert(`Searching for: ${searchService} in ${searchLocation} for ${selectedEthnicity || 'all ethnicities'}`);
+    filterProviders();
+    if (filteredProviders.length === 0 && searchLocation.trim()) {
+      alert(`No providers found in ${searchLocation}. Try searching for London, Manchester, Leeds, Newcastle, or Chelmsford.`);
+    } else {
+      alert(`Found ${filteredProviders.length} provider(s) in ${searchLocation || 'all locations'}`);
+    }
   };
 
   return (
@@ -210,8 +233,23 @@ export default function Home() {
       {/* Providers Grid */}
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-4">
+          {searchLocation && (
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {filteredProviders.length > 0 
+                  ? `${filteredProviders.length} provider(s) found in ${searchLocation}`
+                  : `No providers found in ${searchLocation}`
+                }
+              </h2>
+              {filteredProviders.length === 0 && (
+                <p className="text-gray-600 mt-2">
+                  Try searching for: London, Manchester, Leeds, Newcastle, or Chelmsford
+                </p>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {providers.map((provider) => (
+            {filteredProviders.map((provider) => (
               <div key={provider.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
@@ -261,7 +299,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-2xl font-bold mb-8">Top Rated Provider</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {providers.map((provider) => (
+            {filteredProviders.map((provider) => (
               <div key={`top-${provider.id}`} className="bg-gray-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
