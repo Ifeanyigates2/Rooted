@@ -7,6 +7,7 @@ import VerifyEmail from "@/pages/VerifyEmail";
 import CompleteProfile from "@/pages/CompleteProfile";
 import TermsAndConditions from "@/pages/TermsAndConditions";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import ProviderDashboard from "@/pages/ProviderDashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
         <Route path="/complete-profile" component={CompleteProfile} />
         <Route path="/terms" component={TermsAndConditions} />
         <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/provider-dashboard" component={ProviderDashboard} />
         <Route component={NotFound} />
       </Switch>
     </ErrorBoundary>
