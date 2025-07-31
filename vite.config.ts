@@ -21,9 +21,13 @@ export default defineConfig({
     minify: "esbuild",
     target: "es2015",
     rollupOptions: {
+      external: ['mongodb', 'bcryptjs'],
       output: {
         manualChunks: undefined,
       },
     },
+  },
+  optimizeDeps: {
+    exclude: ['mongodb', 'bcryptjs']
   },
 });
