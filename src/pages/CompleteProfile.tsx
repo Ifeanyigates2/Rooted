@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Camera } from "lucide-react";
+import { authService } from "@/lib/auth";
  
 export default function CompleteProfile() {
   const [, setLocation] = useLocation();
@@ -38,8 +39,29 @@ export default function CompleteProfile() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Profile completed successfully!");
-    setLocation("/provider-dashboard");
+    
+    // Get current user from localStorage
+    const currentUser = localStorage.getItem('user');
+    if (currentUser) {
+      const user = JSON.parse(currentUser);
+      
+      // Update provider profile in database
+      authService.updateProviderProfile(user._id, {
+        bio: profileData.bio,
+        location: profileData.location,
+        services: profileData.interests, // Map interests to services
+        businessName: profileData.serviceName || `${user.firstName} ${user.lastName}`
+      }).then(() => {
+        alert("Profile completed successfully!");
+        setLocation("/provider-dashboard");
+      }).catch((error) => {
+        console.error('Profile update error:', error);
+        alert("Error updating profile. Please try again.");
+      });
+    } else {
+      alert("Profile completed successfully!");
+      setLocation("/provider-dashboard");
+    }
   };
 
   return (

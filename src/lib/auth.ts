@@ -1,113 +1,23 @@
+import bcrypt from 'bcryptjs';
+import { getUsersCollection, getServiceProvidersCollection, ServiceProvider } from './mongodb';
 import { User, Provider } from '../types/user';
-
-// Mock database using localStorage
-class MockDatabase {
-  private getUsers(): User[] {
-    const users = localStorage.getItem('rooted_users');
-    return users ? JSON.parse(users) : [];
-  }
-
-  private saveUsers(users: User[]): void {
-    localStorage.setItem('rooted_users', JSON.stringify(users));
-  }
-
-  private getProviders(): Provider[] {
-    const providers = localStorage.getItem('rooted_providers');
-    return providers ? JSON.parse(providers) : [];
-  }
-
-  private saveProviders(providers: Provider[]): void {
-    localStorage.setItem('rooted_providers', JSON.stringify(providers));
-  }
-
-  async findUserByEmail(email: string): Promise<User | null> {
-    const users = this.getUsers();
-    return users.find(user => user.email === email) || null;
-  }
-
-  async createUser(userData: Omit<User, '_id' | 'createdAt' | 'updatedAt'>): Promise<string> {
-    const users = this.getUsers();
-    const newUser: User = {
-      ...userData,
-      _id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    users.push(newUser);
-    this.saveUsers(users);
-    
-    return newUser._id;
-  }
-
-  async createProvider(providerData: Omit<Provider, 'createdAt' | 'updatedAt'>): Promise<void> {
-    const providers = this.getProviders();
-    const newProvider: Provider = {
-      ...providerData,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    
-    providers.push(newProvider);
-    this.saveProviders(providers);
-  }
-
-  async updateUser(email: string, updates: Partial<User>): Promise<void> {
-    const users = this.getUsers();
-    const userIndex = users.findIndex(user => user.email === email);
-    
-    if (userIndex !== -1) {
-      users[userIndex] = {
-        ...users[userIndex],
-        ...updates,
-        updatedAt: new Date()
-      };
-      this.saveUsers(users);
-    }
-  }
-
-  async updateProvider(userId: string, updates: Partial<Provider>): Promise<void> {
-    const providers = this.getProviders();
-    const providerIndex = providers.findIndex(provider => provider._id === userId);
-    
-    if (providerIndex !== -1) {
-      providers[providerIndex] = {
-        ...providers[providerIndex],
-        ...updates,
-        updatedAt: new Date()
-      };
-      this.saveProviders(providers);
-    }
-  }
-
-  async getProviderById(providerId: string): Promise<Provider | null> {
-    const providers = this.getProviders();
-    return providers.find(provider => provider._id === providerId) || null;
-  }
-}
 
 // Simple password hashing for demo (not secure for production)
 function simpleHash(password: string): string {
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return hash.toString();
+  return bcrypt.hashSync(password, 10);
 }
 
 function verifyPassword(password: string, hash: string): boolean {
-  return simpleHash(password) === hash;
+  return bcrypt.compareSync(password, hash);
 }
 
 export class AuthService {
-  private db = new MockDatabase();
-
   async registerUser(userData: Omit<User, '_id' | 'createdAt' | 'updatedAt'>) {
     try {
+      const usersCollection = await getUsersCollection();
+      
       // Check if user already exists
-      const existingUser = await this.db.findUserByEmail(userData.email);
+      const existingUser = await usersCollection.findOne({ email: userData.email });
       if (existingUser) {
         throw new Error('User already exists with this email');
       }
@@ -118,23 +28,52 @@ export class AuthService {
       const newUserData = {
         ...userData,
         password: hashedPassword,
-        isEmailVerified: false
+        isEmailVerified: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
-      const userId = await this.db.createUser(newUserData);
+      const result = await usersCollection.insertOne(newUserData);
+      const userId = result.insertedId.toString();
       
-      // If provider, also create provider profile
+      // If provider, also create provider profile in service_providers collection
       if (userData.userType === 'provider') {
-        const providerData: Omit<Provider, 'createdAt' | 'updatedAt'> = {
-          ...newUserData,
-          _id: userId,
+        const serviceProvidersCollection = await getServiceProvidersCollection();
+        
+        const providerData: Omit<ServiceProvider, '_id'> = {
+          userId: userId,
+          businessName: `${userData.firstName} ${userData.lastName}`,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          bio: '',
+          location: '',
           services: [],
+          specialties: [],
+          experience: 0,
           rating: 0,
           totalReviews: 0,
           totalEarnings: 0,
-          isVerified: false
+          isVerified: false,
+          isActive: true,
+          availability: {
+            monday: { start: "09:00", end: "17:00", available: true },
+            tuesday: { start: "09:00", end: "17:00", available: true },
+            wednesday: { start: "09:00", end: "17:00", available: true },
+            thursday: { start: "09:00", end: "17:00", available: true },
+            friday: { start: "09:00", end: "17:00", available: true },
+            saturday: { start: "09:00", end: "17:00", available: false },
+            sunday: { start: "09:00", end: "17:00", available: false }
+          },
+          portfolio: [],
+          certifications: [],
+          languages: ['English'],
+          priceRange: { min: 0, max: 0 },
+          createdAt: new Date(),
+          updatedAt: new Date()
         };
-        await this.db.createProvider(providerData);
+        
+        await serviceProvidersCollection.insertOne(providerData);
       }
 
       return { success: true, userId };
@@ -146,7 +85,8 @@ export class AuthService {
 
   async loginUser(email: string, password: string) {
     try {
-      const user = await this.db.findUserByEmail(email);
+      const usersCollection = await getUsersCollection();
+      const user = await usersCollection.findOne({ email });
 
       if (!user) {
         throw new Error('User not found');
@@ -159,7 +99,7 @@ export class AuthService {
 
       // Return user without password
       const { password: _, ...userWithoutPassword } = user;
-      return { success: true, user: userWithoutPassword };
+      return { success: true, user: { ...userWithoutPassword, _id: user._id.toString() } };
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -168,9 +108,16 @@ export class AuthService {
 
   async verifyEmail(email: string) {
     try {
-      await this.db.updateUser(email, { 
-        isEmailVerified: true
-      });
+      const usersCollection = await getUsersCollection();
+      await usersCollection.updateOne(
+        { email },
+        { 
+          $set: { 
+            isEmailVerified: true,
+            updatedAt: new Date()
+          }
+        }
+      );
       return { success: true };
     } catch (error) {
       console.error('Email verification error:', error);
@@ -178,9 +125,18 @@ export class AuthService {
     }
   }
 
-  async updateProviderProfile(userId: string, profileData: Partial<Provider>) {
+  async updateProviderProfile(userId: string, profileData: Partial<ServiceProvider>) {
     try {
-      await this.db.updateProvider(userId, profileData);
+      const serviceProvidersCollection = await getServiceProvidersCollection();
+      await serviceProvidersCollection.updateOne(
+        { userId },
+        { 
+          $set: { 
+            ...profileData,
+            updatedAt: new Date()
+          }
+        }
+      );
       return { success: true };
     } catch (error) {
       console.error('Profile update error:', error);
@@ -190,9 +146,30 @@ export class AuthService {
 
   async getProviderById(providerId: string) {
     try {
-      return await this.db.getProviderById(providerId);
+      const serviceProvidersCollection = await getServiceProvidersCollection();
+      return await serviceProvidersCollection.findOne({ _id: providerId });
     } catch (error) {
       console.error('Get provider error:', error);
+      throw error;
+    }
+  }
+
+  async getProviderByUserId(userId: string) {
+    try {
+      const serviceProvidersCollection = await getServiceProvidersCollection();
+      return await serviceProvidersCollection.findOne({ userId });
+    } catch (error) {
+      console.error('Get provider by user ID error:', error);
+      throw error;
+    }
+  }
+
+  async getAllServiceProviders() {
+    try {
+      const serviceProvidersCollection = await getServiceProvidersCollection();
+      return await serviceProvidersCollection.find({ isActive: true }).toArray();
+    } catch (error) {
+      console.error('Get all providers error:', error);
       throw error;
     }
   }
