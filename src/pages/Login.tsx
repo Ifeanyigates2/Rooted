@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Briefcase } from "lucide-react";
+import { authService } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Login() {
   const [, setLocation] = useLocation();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -18,7 +21,7 @@ export default function Login() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.email || !formData.password || !formData.userType) {
@@ -26,13 +29,29 @@ export default function Login() {
       return;
     }
 
-    alert("Login successful!");
-    
-    // Redirect based on user type
-    if (formData.userType === "provider") {
-      setLocation("/provider-dashboard");
-    } else {
-      setLocation("/");
+    try {
+      const result = await authService.loginUser(formData.email, formData.password);
+      
+      if (result.success && result.user) {
+        // Check if user type matches what they selected
+        if (result.user.userType !== formData.userType) {
+          alert(`This account is registered as a ${result.user.userType}, not a ${formData.userType}`);
+          return;
+        }
+
+        login(result.user);
+        alert("Login successful!");
+        
+        // Redirect based on user type
+        if (result.user.userType === "provider") {
+          setLocation("/provider-dashboard");
+        } else {
+          setLocation("/");
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert(error instanceof Error ? error.message : 'Login failed');
     }
   };
 

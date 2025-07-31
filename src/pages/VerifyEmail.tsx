@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { authService } from "@/lib/auth";
  
 export default function VerifyEmail() {
   const [, setLocation] = useLocation();
@@ -16,19 +17,26 @@ export default function VerifyEmail() {
     }
   }, [setLocation]);
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     // For demo purposes, any 4-digit code works
     if (otpValue.length === 4) {
-      alert("Email verified successfully! (Demo - no real email sent)");
-      const userType = localStorage.getItem("userType");
-      localStorage.removeItem("verificationEmail");
-      localStorage.removeItem("userType");
-      
-      // Redirect based on user type
-      if (userType === "provider") {
-        setLocation("/complete-profile");
-      } else {
-        setLocation("/");
+      try {
+        await authService.verifyEmail(email);
+        alert("Email verified successfully!");
+        
+        const userType = localStorage.getItem("userType");
+        localStorage.removeItem("verificationEmail");
+        localStorage.removeItem("userType");
+        
+        // Redirect based on user type
+        if (userType === "provider") {
+          setLocation("/complete-profile");
+        } else {
+          setLocation("/");
+        }
+      } catch (error) {
+        console.error('Verification error:', error);
+        alert('Verification failed. Please try again.');
       }
     } else {
       alert("Please enter a 4-digit code (any numbers work for demo)");

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Briefcase, Sparkles, ArrowLeft } from "lucide-react";
+import { authService } from "@/lib/auth";
 
 export default function Account() {
   const [, setLocation] = useLocation();
@@ -22,13 +23,32 @@ export default function Account() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Store user type for later use
-    localStorage.setItem("userType", formData.userType);
-    // Demo: Just redirect to verification
-    localStorage.setItem("verificationEmail", formData.email);
-    setLocation("/verify-email");
+    
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords don't match!");
+      return;
+    }
+
+    try {
+      await authService.registerUser({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        userType: formData.userType as 'customer' | 'provider',
+        isEmailVerified: false
+      });
+
+      // Store user type and email for verification flow
+      localStorage.setItem("userType", formData.userType);
+      localStorage.setItem("verificationEmail", formData.email);
+      setLocation("/verify-email");
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert(error instanceof Error ? error.message : 'Registration failed');
+    }
   };
 
   return (
