@@ -4,54 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 import { User, Briefcase } from "lucide-react";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     userType: ""
-  });
-
-  const loginMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      const response = await apiRequest("POST", "/api/login", data);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
-      
-      // Store session ID for authenticated requests
-      if (data.sessionId) {
-        localStorage.setItem("sessionId", data.sessionId);
-      }
-      
-      // Redirect based on user type
-      if (data.user.userType === "provider") {
-        setLocation("/provider/dashboard");
-      } else {
-        // Check if customer needs to complete profile
-        if (data.user.profileCompleted) {
-          setLocation("/");
-        } else {
-          setLocation("/complete-profile");
-        }
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid email or password.",
-        variant: "destructive",
-      });
-    },
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -62,32 +22,103 @@ export default function Login() {
     e.preventDefault();
     
     if (!formData.email || !formData.password || !formData.userType) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all fields including user type.",
-        variant: "destructive",
-      });
+      alert("Please fill in all fields including user type.");
       return;
     }
 
-    loginMutation.mutate(formData);
     // Demo: Just redirect based on user type
-    if (formData.userType === "provider") {
-      setLocation("/provider/dashboard");
-    } else {
-      setLocation("/");
-    }
+    alert("Login successful!");
+    setLocation("/");
   };
 
   return (
-          <Button
-            type="submit"
-            disabled={loginMutation.isPending}
-            className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg"
-          >
-            {loginMutation.isPending ? "Signing in..." : "Sign in ✨"}
-            Sign in ✨
-          </Button>
-        </form>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-2xl border-0">
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-3xl font-bold text-gray-900">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-lg text-gray-600">
+              Sign in to your account
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-center mb-6">
+                  I am a...
+                </h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    type="button"
+                    onClick={() => handleInputChange("userType", "customer")}
+                    variant={formData.userType === "customer" ? "default" : "outline"}
+                    className="p-6 h-auto flex flex-col items-center space-y-2"
+                  >
+                    <User className="h-6 w-6" />
+                    <span>Customer</span>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={() => handleInputChange("userType", "provider")}
+                    variant={formData.userType === "provider" ? "default" : "outline"}
+                    className="p-6 h-auto flex flex-col items-center space-y-2"
+                  >
+                    <Briefcase className="h-6 w-6" />
+                    <span>Provider</span>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
+                  required
+                  className="h-12"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  required
+                  className="h-12"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg"
+              >
+                Sign in ✨
+              </Button>
+
+              <p className="text-center text-gray-600 mt-6">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => setLocation("/signup")}
+                  className="text-[var(--rooted-primary)] hover:underline font-semibold"
+                >
+                  Sign up
+                </button>
+              </p>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
