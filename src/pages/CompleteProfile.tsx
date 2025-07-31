@@ -10,7 +10,8 @@ export default function CompleteProfile() {
     gender: "",
     interests: [] as string[],
     bio: "",
-    location: ""
+    location: "",
+    serviceName: ""
   });
 
   const interests = [
@@ -136,6 +137,17 @@ export default function CompleteProfile() {
                 value={profileData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 placeholder="City, State"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Service Name</label>
+              <input
+                type="text"
+                value={profileData.serviceName}
+                onChange={(e) => handleInputChange('serviceName', e.target.value)}
+                placeholder="e.g., Hair Styling, Makeup Artistry, Nail Care"
                 className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
