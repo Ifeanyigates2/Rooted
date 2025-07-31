@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Briefcase, Sparkles, ArrowLeft } from "lucide-react";
-import signupImage from "@assets/login sign up_1751136337552.jpg";
 
 export default function Account() {
   const [, setLocation] = useLocation();
@@ -35,11 +34,9 @@ export default function Account() {
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         {/* Left side - Image */}
         <div className="hidden lg:block">
-          <img
-            src={signupImage}
-            alt="Sign up illustration"
-            className="w-full h-auto rounded-2xl shadow-2xl"
-          />
+          <div className="w-full h-96 bg-gradient-to-br from-purple-400 to-pink-400 rounded-2xl shadow-2xl flex items-center justify-center">
+            <Sparkles className="h-24 w-24 text-white" />
+          </div>
         </div>
 
         {/* Right side - Form */}
@@ -75,12 +72,12 @@ export default function Account() {
                   <Button
                     onClick={() => {
                       setUserType("customer");
-                      setFormData(prev => ({ ...prev, userType: "customer" }));
+                      handleInputChange("userType", "customer");
                     }}
                     variant="outline"
-                    className="w-full p-6 h-auto flex flex-col items-center space-y-2 hover:bg-[var(--rooted-primary)]/5 hover:border-[var(--rooted-primary)] transition-colors"
+                    className="w-full p-6 h-auto flex flex-col items-center space-y-2 hover:bg-gray-50 hover:border-gray-900 transition-colors"
                   >
-                    <User className="h-8 w-8 text-[var(--rooted-primary)]" />
+                    <User className="h-8 w-8 text-gray-900" />
                     <div className="text-center">
                       <div className="font-semibold">Find Services</div>
                       <div className="text-sm text-gray-500">
@@ -92,12 +89,12 @@ export default function Account() {
                   <Button
                     onClick={() => {
                       setUserType("provider");
-                      setFormData(prev => ({ ...prev, userType: "provider" }));
+                      handleInputChange("userType", "provider");
                     }}
                     variant="outline"
-                    className="w-full p-6 h-auto flex flex-col items-center space-y-2 hover:bg-[var(--rooted-primary)]/5 hover:border-[var(--rooted-primary)] transition-colors"
+                    className="w-full p-6 h-auto flex flex-col items-center space-y-2 hover:bg-gray-50 hover:border-gray-900 transition-colors"
                   >
-                    <Briefcase className="h-8 w-8 text-[var(--rooted-primary)]" />
+                    <Briefcase className="h-8 w-8 text-gray-900" />
                     <div className="text-center">
                       <div className="font-semibold">Offer Services</div>
                       <div className="text-sm text-gray-500">
@@ -181,7 +178,7 @@ export default function Account() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg mt-8"
+                    className="w-full bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-lg mt-8"
                   >
                     Sign up ✨
                   </Button>
@@ -192,7 +189,7 @@ export default function Account() {
                     <button
                       type="button"
                       onClick={() => setLocation("/login")}
-                      className="text-[var(--rooted-primary)] hover:underline font-semibold"
+                      className="text-gray-900 hover:underline font-semibold"
                     >
                       Sign in
                     </button>

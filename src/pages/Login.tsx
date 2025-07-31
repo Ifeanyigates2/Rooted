@@ -26,7 +26,6 @@ export default function Login() {
       return;
     }
 
-    // Demo: Just redirect based on user type
     alert("Login successful!");
     setLocation("/");
   };
@@ -100,7 +99,7 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg"
+                className="w-full bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-lg"
               >
                 Sign in ✨
               </Button>
@@ -110,7 +109,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setLocation("/signup")}
-                  className="text-[var(--rooted-primary)] hover:underline font-semibold"
+                  className="text-gray-900 hover:underline font-semibold"
                 >
                   Sign up
                 </button>

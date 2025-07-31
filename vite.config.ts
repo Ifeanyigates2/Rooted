@@ -9,16 +9,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-  },
   build: {
+    outDir: "dist",
+    sourcemap: false,
+    minify: "esbuild",
+    target: "es2015",
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['wouter'],
-        },
+        manualChunks: undefined,
       },
     },
   },

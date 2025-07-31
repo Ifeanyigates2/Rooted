@@ -7,33 +7,29 @@ export default function VerifyEmail() {
   const [otpValue, setOtpValue] = useState("");
   const [email, setEmail] = useState("");
  
-  // Get email from localStorage on component mount
   useEffect(() => {
     const storedEmail = localStorage.getItem("verificationEmail");
     if (storedEmail) {
       setEmail(storedEmail);
     } else {
-      // Redirect to signup if no email found
       setLocation("/signup");
     }
   }, [setLocation]);
 
   const handleVerify = () => {
     if (otpValue.length === 4) {
-      // Demo: Just redirect to complete profile
       alert("Email verified successfully!");
       localStorage.removeItem("verificationEmail");
       setLocation("/complete-profile");
     }
   };
 
-  const handleResendCode = async () => {
-    // Demo: Just show alert
+  const handleResendCode = () => {
     alert("Code resent to your email!");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--rooted-primary)]/5 to-[var(--rooted-secondary)]/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
           <div className="text-center space-y-2">
@@ -53,7 +49,7 @@ export default function VerifyEmail() {
                 value={otpValue}
                 onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="0000"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--rooted-primary)] focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent text-center text-2xl font-mono tracking-widest"
                 maxLength={4}
               />
             </div>
@@ -61,7 +57,7 @@ export default function VerifyEmail() {
             <Button
               onClick={handleVerify}
               disabled={otpValue.length !== 4}
-              className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg"
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-lg"
             >
               Verify ✨
             </Button>
@@ -72,7 +68,7 @@ export default function VerifyEmail() {
               Didn't receive the code?{" "}
               <button
                 onClick={handleResendCode}
-                className="text-[var(--rooted-primary)] hover:underline font-medium"
+                className="text-gray-900 hover:underline font-medium"
               >
                 Resend
               </button>

@@ -14,12 +14,12 @@ export default function CompleteProfile() {
   });
 
   const interests = [
-    { id: "skincare", label: "Skincare", image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" },
-    { id: "makeup", label: "Makeup", image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" },
-    { id: "haircare", label: "Hair Care", image: "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" },
-    { id: "wellness", label: "Wellness", image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" },
-    { id: "fashion", label: "Fashion", image: "https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" },
-    { id: "coaching", label: "Coaching", image: "https://images.unsplash.com/photo-1551836022-deb4988cc6c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100" }
+    { id: "skincare", label: "Skincare" },
+    { id: "makeup", label: "Makeup" },
+    { id: "haircare", label: "Hair Care" },
+    { id: "wellness", label: "Wellness" },
+    { id: "fashion", label: "Fashion" },
+    { id: "coaching", label: "Coaching" }
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -37,7 +37,6 @@ export default function CompleteProfile() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo: Just redirect to home
     alert("Profile completed successfully!");
     setLocation("/");
   };
@@ -52,7 +51,6 @@ export default function CompleteProfile() {
 
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <form onSubmit={handleSave} className="space-y-6">
-            {/* Profile Picture */}
             <div className="text-center">
               <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 {profileData.profilePicture ? (
@@ -79,19 +77,18 @@ export default function CompleteProfile() {
               />
               <label
                 htmlFor="profile-picture"
-                className="text-[var(--rooted-primary)] font-medium cursor-pointer hover:underline"
+                className="text-gray-900 font-medium cursor-pointer hover:underline"
               >
                 Add Profile Picture
               </label>
             </div>
 
-            {/* Gender */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
               <select
                 value={profileData.gender}
                 onChange={(e) => handleInputChange('gender', e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--rooted-primary)] focus:border-transparent"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               >
                 <option value="">Select gender</option>
                 <option value="female">Female</option>
@@ -101,7 +98,6 @@ export default function CompleteProfile() {
               </select>
             </div>
 
-            {/* Interests */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">Interests</label>
               <div className="grid grid-cols-2 gap-3">
@@ -112,22 +108,16 @@ export default function CompleteProfile() {
                     onClick={() => handleInterestToggle(interest.id)}
                     className={`p-3 rounded-xl border-2 transition-all ${
                       profileData.interests.includes(interest.id)
-                        ? 'border-[var(--rooted-primary)] bg-[var(--rooted-primary)]/10'
+                        ? 'border-gray-900 bg-gray-100'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <img
-                      src={interest.image}
-                      alt={interest.label}
-                      className="w-12 h-12 rounded-lg mx-auto mb-2 object-cover"
-                    />
                     <span className="text-sm font-medium">{interest.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Bio */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
               <textarea
@@ -135,11 +125,10 @@ export default function CompleteProfile() {
                 onChange={(e) => handleInputChange('bio', e.target.value)}
                 placeholder="Tell us about yourself..."
                 rows={3}
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--rooted-primary)] focus:border-transparent resize-none"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-none"
               />
             </div>
 
-            {/* Location */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
               <input
@@ -147,13 +136,13 @@ export default function CompleteProfile() {
                 value={profileData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
                 placeholder="City, State"
-                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--rooted-primary)] focus:border-transparent"
+                className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-[var(--rooted-primary)] text-white py-4 rounded-xl font-semibold hover:bg-[var(--rooted-primary)]/90 transition-colors text-lg"
+              className="w-full bg-gray-900 text-white py-4 rounded-xl font-semibold hover:bg-gray-800 transition-colors text-lg"
             >
               Save ✨
             </Button>
