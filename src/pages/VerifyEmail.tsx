@@ -17,15 +17,18 @@ export default function VerifyEmail() {
   }, [setLocation]);
 
   const handleVerify = () => {
+    // For demo purposes, any 4-digit code works
     if (otpValue.length === 4) {
-      alert("Email verified successfully!");
+      alert("Email verified successfully! (Demo - no real email sent)");
       localStorage.removeItem("verificationEmail");
       setLocation("/complete-profile");
+    } else {
+      alert("Please enter a 4-digit code (any numbers work for demo)");
     }
   };
 
   const handleResendCode = () => {
-    alert("Code resent to your email!");
+    alert("Demo: No real email sent. Enter any 4-digit code to continue.");
   };
 
   return (
@@ -36,6 +39,9 @@ export default function VerifyEmail() {
             <h1 className="text-2xl font-bold text-gray-900">Verify Your Email</h1>
             <p className="text-gray-600">
               We've sent a 4-digit code to <span className="font-semibold">{email}</span>
+            </p>
+            <p className="text-sm text-blue-600 mt-2">
+              Demo: Enter any 4-digit code (e.g., 1234) to continue
             </p>
           </div>
 
