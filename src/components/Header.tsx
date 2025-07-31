@@ -26,7 +26,7 @@ const Header = () => {
             
             <Link href="/login">
               <button className="flex items-center space-x-2 bg-gray-900 text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-colors">
-                <span className="text-sm">Sign in</span>
+                <span className="text-sm">Register/Sign in</span>
                 <User className="h-4 w-4" />
               </button>
             </Link>
