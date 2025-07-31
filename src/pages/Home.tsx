@@ -6,7 +6,6 @@ export default function Home() {
   const [searchService, setSearchService] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [selectedEthnicity, setSelectedEthnicity] = useState('');
-  const [filteredProviders, setFilteredProviders] = useState(providers);
 
   const categories = [
     { name: 'Hair', image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=100&h=100' },
@@ -65,6 +64,8 @@ export default function Home() {
       verified: true
     }
   ];
+
+  const [filteredProviders, setFilteredProviders] = useState(providers);
 
   // Filter providers based on search location
   const filterProviders = () => {

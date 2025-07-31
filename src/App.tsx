@@ -1,4 +1,5 @@
 import { Switch, Route } from "wouter";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Home from "@/pages/Home";
 import Account from "@/pages/Account";
 import Login from "@/pages/Login";
@@ -10,16 +11,18 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/signup" component={Account} />
-      <Route path="/login" component={Login} />
-      <Route path="/verify-email" component={VerifyEmail} />
-      <Route path="/complete-profile" component={CompleteProfile} />
-      <Route path="/terms" component={TermsAndConditions} />
-      <Route path="/privacy" component={PrivacyPolicy} />
-      <Route component={NotFound} />
-    </Switch>
+    <ErrorBoundary>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/signup" component={Account} />
+        <Route path="/login" component={Login} />
+        <Route path="/verify-email" component={VerifyEmail} />
+        <Route path="/complete-profile" component={CompleteProfile} />
+        <Route path="/terms" component={TermsAndConditions} />
+        <Route path="/privacy" component={PrivacyPolicy} />
+        <Route component={NotFound} />
+      </Switch>
+    </ErrorBoundary>
   );
 }
 
