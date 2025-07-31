@@ -20,8 +20,16 @@ export default function VerifyEmail() {
     // For demo purposes, any 4-digit code works
     if (otpValue.length === 4) {
       alert("Email verified successfully! (Demo - no real email sent)");
+      const userType = localStorage.getItem("userType");
       localStorage.removeItem("verificationEmail");
-      setLocation("/complete-profile");
+      localStorage.removeItem("userType");
+      
+      // Redirect based on user type
+      if (userType === "provider") {
+        setLocation("/complete-profile");
+      } else {
+        setLocation("/");
+      }
     } else {
       alert("Please enter a 4-digit code (any numbers work for demo)");
     }

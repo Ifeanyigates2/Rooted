@@ -24,6 +24,8 @@ export default function Account() {
 
   const handleSignUp = (e: React.FormEvent) => {
     e.preventDefault();
+    // Store user type for later use
+    localStorage.setItem("userType", formData.userType);
     // Demo: Just redirect to verification
     localStorage.setItem("verificationEmail", formData.email);
     setLocation("/verify-email");

@@ -27,7 +27,13 @@ export default function Login() {
     }
 
     alert("Login successful!");
-    setLocation("/");
+    
+    // Redirect based on user type
+    if (formData.userType === "provider") {
+      setLocation("/provider-dashboard");
+    } else {
+      setLocation("/");
+    }
   };
 
   return (

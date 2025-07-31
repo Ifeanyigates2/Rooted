@@ -39,7 +39,7 @@ export default function CompleteProfile() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     alert("Profile completed successfully!");
-    setLocation("/");
+    setLocation("/provider-dashboard");
   };
 
   return (
