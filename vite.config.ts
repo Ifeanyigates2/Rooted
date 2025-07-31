@@ -7,8 +7,7 @@ export default defineConfig({
   server: {
     port: 5174,
   },
-  define: {
-    'process.env': {}
+    }
   },
   resolve: {
     alias: {
@@ -24,10 +23,4 @@ export default defineConfig({
       external: ['mongodb', 'bcryptjs'],
       output: {
         manualChunks: undefined,
-      },
-    },
-  },
-  optimizeDeps: {
-    exclude: ['mongodb', 'bcryptjs']
-  },
 });
