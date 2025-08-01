@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { authService } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
+import React from "react";
 
 export default function ProviderDashboard() {
   const { user } = useAuth();
