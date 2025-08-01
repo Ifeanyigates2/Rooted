@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Search, MapPin, ChevronDown, Heart, Star } from 'lucide-react';
 import Header from '@/components/Header';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 export default function Home() {
   const [searchService, setSearchService] = useState('');
@@ -66,6 +68,13 @@ export default function Home() {
   ];
 
   const [filteredProviders, setFilteredProviders] = useState(providers);
+
+  const heroImages = [
+    '/attached_assets/img 2 copy copy copy.jpg',
+    '/attached_assets/img 3 copy copy copy.jpg', 
+    '/attached_assets/img 4 copy copy copy.jpg',
+    '/attached_assets/img 1 copy copy copy.jpg'
+  ];
 
   // Filter providers based on search location
   const filterProviders = () => {
@@ -143,68 +152,99 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative">
         <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="relative rounded-3xl overflow-hidden">
+            <Carousel 
+              className="w-full"
+              plugins={[
+                Autoplay({
+                  delay: 4000,
+                })
+              ]}
+            >
+              <CarouselContent>
+                {heroImages.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <div className="relative bg-gray-800 h-[600px] flex items-center justify-center">
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center"
+                        style={{
+                          backgroundImage: `url(${image})`,
+                          filter: 'brightness(0.4)'
+                        }}
+                      />
+                      <div className="relative z-10 px-8 py-16 text-center max-w-4xl mx-auto">
+                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
+                          Discover beauty professionals who knows your<br />
+                          skin, hair & culture !
+                        </h1>
+                        
+                        <div className="flex flex-col md:flex-row gap-4 mb-6">
+                          <div className="flex-1 relative">
+                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                            <input
+                              type="text"
+                              placeholder="Search Service, provider"
+                              value={searchService}
+                              onChange={(e) => setSearchService(e.target.value)}
+                              className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
+                            />
+                          </div>
+                          
+                          <div className="flex-1 relative">
+                            <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                            <input
+                              type="text"
+                              placeholder="Enter your location"
+                              value={searchLocation}
+                              onChange={(e) => setSearchLocation(e.target.value)}
+                              className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
+                            />
+                          </div>
+                          
+                          <div className="flex-1 relative">
+                            <select
+                              value={selectedEthnicity}
+                              onChange={(e) => setSelectedEthnicity(e.target.value)}
+                              className="w-full px-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900 appearance-none bg-white"
+                            >
+                              <option value="">Select Ethnicity</option>
+                              <option value="african">African</option>
+                              <option value="asian">Asian</option>
+                              <option value="caucasian">Caucasian</option>
+                              <option value="hispanic">Hispanic</option>
+                              <option value="mixed">Mixed</option>
+                            </select>
+                            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={handleSearch}
+                          className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
+                        >
+                          Find Your Perfect match
+                        </button>
+                      </div>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-4" />
+              <CarouselNext className="right-4" />
+            </Carousel>
+          </div>
+        </div>
+      </section>
+
+      {/* Remove the old hero content that was duplicated */}
+      <section className="hidden">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="relative bg-gray-800 rounded-3xl overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: 'url(https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=1200&h=600)',
-                filter: 'brightness(0.4)'
-              }}
-            />
             <div className="relative z-10 px-8 py-16 text-center">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
                 Discover beauty professionals who knows your<br />
                 skin, hair & culture !
               </h1>
-              
-              <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <input
-                      type="text"
-                      placeholder="Search Service, provider"
-                      value={searchService}
-                      onChange={(e) => setSearchService(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
-                    />
-                  </div>
-                  
-                  <div className="flex-1 relative">
-                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                    <input
-                      type="text"
-                      placeholder="Enter your location"
-                      value={searchLocation}
-                      onChange={(e) => setSearchLocation(e.target.value)}
-                      className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
-                    />
-                  </div>
-                  
-                  <div className="flex-1 relative">
-                    <select
-                      value={selectedEthnicity}
-                      onChange={(e) => setSelectedEthnicity(e.target.value)}
-                      className="w-full px-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900 appearance-none bg-white"
-                    >
-                      <option value="">Select Ethnicity</option>
-                      <option value="african">African</option>
-                      <option value="asian">Asian</option>
-                      <option value="caucasian">Caucasian</option>
-                      <option value="hispanic">Hispanic</option>
-                      <option value="mixed">Mixed</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
-                  </div>
-                </div>
-                
-                <button
-                  onClick={handleSearch}
-                  className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
-                >
-                  Find Your Perfect match
-                </button>
-              </div>
             </div>
           </div>
         </div>
