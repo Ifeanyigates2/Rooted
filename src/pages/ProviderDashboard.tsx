@@ -24,15 +24,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { authService } from "@/lib/auth";
 
 export default function ProviderDashboard() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Mock data - in real app this would come from API
-  const providerData = {
-    name: "Sarah Johnson",
-    businessName: "Crowned Beauty",
+  const [providerData, setProviderData] = useState({
+    name: "Loading...",
+    businessName: "Loading...",
     rating: 4.9,
     totalReviews: 127,
     totalEarnings: 2450.00,
@@ -45,7 +45,40 @@ export default function ProviderDashboard() {
       { id: 2, name: "Protective Styling", price: 85, duration: 180 },
       { id: 3, name: "Hair Consultation", price: 25, duration: 30 }
     ]
-  };
+  });
+
+  // Load provider data when component mounts
+  React.useEffect(() => {
+    const loadProviderData = async () => {
+      if (user && user.userType === 'provider') {
+        try {
+          const provider = await authService.getProviderByUserId(user._id);
+          if (provider) {
+            setProviderData({
+              name: `${provider.firstName} ${provider.lastName}`,
+              businessName: provider.businessName,
+              rating: provider.rating,
+              totalReviews: provider.totalReviews,
+              totalEarnings: provider.totalEarnings,
+              monthlyEarnings: provider.totalEarnings * 0.35, // Approximate monthly
+              completedBookings: provider.totalReviews, // Approximate
+              upcomingBookings: 12, // Mock data
+              profileImage: provider.profilePicture || "https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=150&h=150",
+              services: [
+                { id: 1, name: "Silk Press & Style", price: 65, duration: 120 },
+                { id: 2, name: "Protective Styling", price: 85, duration: 180 },
+                { id: 3, name: "Hair Consultation", price: 25, duration: 30 }
+              ]
+            });
+          }
+        } catch (error) {
+          console.error('Error loading provider data:', error);
+        }
+      }
+    };
+
+    loadProviderData();
+  }, [user]);
 
   const upcomingBookings = [
     {
