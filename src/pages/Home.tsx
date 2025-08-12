@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MapPin, ChevronDown, Heart, Star } from 'lucide-react';
 import Header from '@/components/Header';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
 export default function Home() {
   const [searchService, setSearchService] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
   const [selectedEthnicity, setSelectedEthnicity] = useState('');
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [bgIndex, setBgIndex] = useState(0);
+  const [prevBgIndex, setPrevBgIndex] = useState(bgIndex);
 
   const categories = [
     { name: 'Hair', image: 'https://images.pexels.com/photos/3993449/pexels-photo-3993449.jpeg?auto=compress&cs=tinysrgb&w=100&h=100' },
@@ -70,10 +73,10 @@ export default function Home() {
   const [filteredProviders, setFilteredProviders] = useState(providers);
 
   const heroImages = [
-    '/attached_assets/img 2 copy copy copy.jpg',
-    '/attached_assets/img 3 copy copy copy.jpg', 
-    '/attached_assets/img 4 copy copy copy.jpg',
-    '/attached_assets/img 1 copy copy copy.jpg'
+    "attached_assets/img 1 copy.jpg",
+    "attached_assets/img 3 copy.jpg",
+    "attached_assets/img 4 copy.jpg",
+    "attached_assets/img 2 copy.jpg"
   ];
 
   // Filter providers based on search location
@@ -93,6 +96,21 @@ export default function Home() {
   React.useEffect(() => {
     filterProviders();
   }, [searchLocation]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (prevBgIndex !== bgIndex) {
+      const timeout = setTimeout(() => setPrevBgIndex(bgIndex), 200); // match transition duration
+      return () => clearTimeout(timeout);
+    }
+  }, [bgIndex, prevBgIndex]);
+
   const trendingServices = [
     {
       id: 1,
@@ -148,90 +166,126 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Hero Section */}
       <section className="relative">
         <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="relative rounded-3xl overflow-hidden">
-            <Carousel 
-              className="w-full"
-              plugins={[
-                Autoplay({
-                  delay: 4000,
-                })
-              ]}
-            >
-              <CarouselContent>
-                {heroImages.map((image, index) => (
-                  <CarouselItem key={index}>
-                    <div className="relative bg-gray-800 h-[600px] flex items-center justify-center">
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center"
+          <div className="relative rounded-3xl overflow-hidden h-[600px] flex items-center justify-center">
+            
+            <div className="absolute inset-0 z-0">
+              <Carousel
+                className="w-full h-full"
+                plugins={[
+                  Autoplay({
+                    delay: 2000,
+                  })
+                ]}
+                slideIndex={heroIndex}
+                onSlideChange={setHeroIndex}
+              >
+                <CarouselContent>
+                  {heroImages.map((image, index) => (
+                    <CarouselItem key={index}>
+                      <div
+                        className="absolute inset-0 w-full h-full bg-cover bg-center"
                         style={{
                           backgroundImage: `url(${image})`,
                           filter: 'brightness(0.4)'
                         }}
                       />
-                      <div className="relative z-10 px-8 py-16 text-center max-w-4xl mx-auto">
-                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
-                          Discover beauty professionals who knows your<br />
-                          skin, hair & culture !
-                        </h1>
-                        
-                        <div className="flex flex-col md:flex-row gap-4 mb-6">
-                          <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                            <input
-                              type="text"
-                              placeholder="Search Service, provider"
-                              value={searchService}
-                              onChange={(e) => setSearchService(e.target.value)}
-                              className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
-                            />
-                          </div>
-                          
-                          <div className="flex-1 relative">
-                            <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                            <input
-                              type="text"
-                              placeholder="Enter your location"
-                              value={searchLocation}
-                              onChange={(e) => setSearchLocation(e.target.value)}
-                              className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
-                            />
-                          </div>
-                          
-                          <div className="flex-1 relative">
-                            <select
-                              value={selectedEthnicity}
-                              onChange={(e) => setSelectedEthnicity(e.target.value)}
-                              className="w-full px-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900 appearance-none bg-white"
-                            >
-                              <option value="">Select Ethnicity</option>
-                              <option value="african">African</option>
-                              <option value="asian">Asian</option>
-                              <option value="caucasian">Caucasian</option>
-                              <option value="hispanic">Hispanic</option>
-                              <option value="mixed">Mixed</option>
-                            </select>
-                            <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
-                          </div>
-                        </div>
-                        
-                        <button
-                          onClick={handleSearch}
-                          className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
-                        >
-                          Find Your Perfect match
-                        </button>
-                      </div>
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-4" />
-              <CarouselNext className="right-4" />
-            </Carousel>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </div>
+            {/* Hero Content (always visible, not swiped) */}
+            <div
+              className="relative z-10 px-8 py-16 text-center max-w-4xl mx-auto w-full rounded-3xl overflow-hidden"
+              
+            >
+              {/* Background image layer */}
+              <div className="absolute inset-0 w-full h-full">
+                {/* Previous image (fading out) */}
+                <div
+                  className={`transition-opacity duration-700 absolute inset-0 w-full h-full bg-cover bg-center ${prevBgIndex === bgIndex ? 'opacity-0' : 'opacity-100'}`}
+                  style={{
+                    backgroundImage: `url('${heroImages[prevBgIndex]}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    filter: 'brightness(0.9) blur(1px)',
+                    zIndex: 0,
+                  }}
+                />
+                {/* Current image (fading in) */}
+                <div
+                  className={`transition-opacity duration-100 absolute inset-0 w-full h-full bg-cover bg-center ${prevBgIndex === bgIndex ? 'opacity-100' : 'opacity-0'}`}
+                  style={{
+                    backgroundImage: `url('${heroImages[bgIndex]}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    filter: 'brightness(0.9) blur(1px)',
+                    zIndex: 0,
+                  }}
+                />
+              </div>
+              {/* Foreground content */}
+              <div className="relative z-10 bg-slate-500 bg-opacity-20 rounded-3xl p-8 text-white"
+                  >
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">
+                  Discover beauty professionals who knows your<br />
+                  skin, hair & culture !
+                </h1>
+                
+                <div className="flex flex-col md:flex-row gap-4 mb-6 ">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="text"
+                      placeholder="Search Service, provider"
+                      value={searchService}
+                      onChange={(e) => setSearchService(e.target.value)}
+                      className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
+                    />
+                  </div>
+                  
+                  <div className="flex-1 relative">
+                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="text"
+                      placeholder="Enter your location"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      className="w-full pl-12 pr-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900"
+                    />
+                  </div>
+                  
+                  <div className="flex-1 relative">
+                    <select
+                      value={selectedEthnicity}
+                      onChange={(e) => setSelectedEthnicity(e.target.value)}
+                      className="w-full px-4 py-4 rounded-full border-0 focus:ring-2 focus:ring-white/20 text-gray-900 appearance-none bg-white"
+                    >
+                      <option value="">Select Ethnicity</option>
+                      <option value="african">African</option>
+                      <option value="asian">Asian</option>
+                      <option value="caucasian">Caucasian</option>
+                      <option value="hispanic">Hispanic</option>
+                      <option value="mixed">Mixed</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleSearch}
+                  className="w-full md:w-auto px-12 py-4 bg-gray-900 text-white rounded-full font-semibold hover:bg-gray-800 transition-colors"
+                >
+                  Find Your Perfect match
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
